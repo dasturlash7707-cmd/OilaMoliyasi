@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Oila Moliyasi</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --red: #D85A30;
+    --red-light: #FAECE7;
+    --purple: #7F77DD;
+    --purple-light: #EEEDFE;
+    --gold: #BA7517;
+    --gold-light: #FAEEDA;
+    --blue: #378ADD;
+    --blue-light: #E6F1FB;
+    --pink: #D4537E;
+    --pink-light: #FBEAF0;
+    --gray: #888780;
+    --gray-light: #F1EFE8;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --border: rgba(0,0,0,0.1);
+    --bg: #f5f5f0;
+    --card: #ffffff;
+    --radius: 14px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+  .header {
+    background: var(--card);
+    padding: 16px;
+    border-bottom: 0.5px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 17px; font-weight: 600; }
+  .header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+  .sync-dot.live { background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .totals {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; padding: 12px 16px;
+  }
+  .total-card {
+    background: var(--card); border-radius: 12px;
+    padding: 10px 12px; text-align: center;
+    border: 0.5px solid var(--border);
+  }
+  .total-card .lbl { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+  .total-card .val { font-size: 15px; font-weight: 600; }
+  .val.green { color: var(--green); }
+  .val.red { color: var(--red); }
+
+  .section-title {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 8px 16px 6px;
+  }
+  .buckets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 12px; }
+  .bucket-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 12px; border: 0.5px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .bucket-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .bucket-card .b-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+  .bucket-card .b-amount { font-size: 16px; font-weight: 600; }
+  .bucket-card .b-pct {
+    font-size: 10px; margin-top: 4px;
+    display: inline-block; padding: 2px 7px; border-radius: 20px; font-weight: 500;
+  }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 12px; }
+  .btn-income {
+    background: var(--green); color: white;
+    border: none; border-radius: 12px; padding: 14px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-expense {
+    background: var(--card); color: var(--red);
+    border: 1.5px solid var(--red); border-radius: 12px; padding: 14px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+
+  .history-list { padding: 0 16px; }
+  .history-item {
+    background: var(--card); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    border: 0.5px solid var(--border);
+  }
+  .h-left { flex: 1; }
+  .h-desc { font-size: 14px; font-weight: 500; }
+  .h-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .h-amount { font-size: 15px; font-weight: 600; }
+  .h-amount.inc { color: var(--green); }
+  .h-amount.exp { color: var(--red); }
+  .empty { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 14px; }
+
+  /* Modal */
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 20px 20px 0 0;
+    padding: 20px 16px 32px; width: 100%; max-width: 480px;
+  }
+  .modal-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 16px; }
+  .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 12px 14px; border: 1px solid var(--border);
+    border-radius: 10px; font-size: 15px; background: var(--bg);
+    color: var(--text); outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--green); }
+  .breakdown-preview {
+    background: var(--green-light); border-radius: 10px; padding: 12px;
+    margin-bottom: 14px; font-size: 12px; color: #0F6E56; display: none;
+  }
+  .breakdown-preview .bp-row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+  .btn-cancel-modal {
+    padding: 13px; border: 1px solid var(--border); border-radius: 10px;
+    background: transparent; font-size: 15px; cursor: pointer; color: var(--text);
+  }
+  .btn-confirm-modal {
+    padding: 13px; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 600; cursor: pointer; color: white;
+  }
+  .btn-confirm-modal.income-btn { background: var(--green); }
+  .btn-confirm-modal.expense-btn { background: var(--red); }
+
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 20px;
+    font-size: 13px; opacity: 0; transition: opacity 0.3s; z-index: 200; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>💰 Oila Moliyasi</h1>
+      <p>Ibrahim Gulyamov metodikasi</p>
+    </div>
+    <div class="sync-dot" id="syncDot" title="Real-vaqt ulanish"></div>
+  </div>
+</div>
+
+<div class="totals">
+  <div class="total-card">
+    <div class="lbl">Kirim</div>
+    <div class="val green" id="tIn">0</div>
+  </div>
+  <div class="total-card">
+    <div class="lbl">Chiqim</div>
+    <div class="val red" id="tOut">0</div>
+  </div>
+  <div class="total-card">
+    <div class="lbl">Qoldiq</div>
+    <div class="val" id="tBal">0</div>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn-income" onclick="openModal('income')">＋ Daromad</button>
+  <button class="btn-expense" onclick="openModal('expense')">－ Xarajat</button>
+</div>
+
+<div class="section-title">Hisoblar holati</div>
+<div class="buckets" id="bucketsGrid"></div>
+
+<div class="section-title">Amaliyotlar tarixi</div>
+<div class="history-list" id="historyList"></div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="modalTitle">Daromad qo'shish</h3>
+    <div class="form-group">
+      <label>Tavsif</label>
+      <input type="text" id="fDesc" placeholder="Masalan: Oy maoshi" />
+    </div>
+    <div class="form-group">
+      <label>Summa (so'm)</label>
+      <input type="number" id="fAmount" placeholder="0" oninput="updatePreview()" />
+    </div>
+    <div class="breakdown-preview" id="bPreview"></div>
+    <div class="form-group" id="bucketGroup" style="display:none;">
+      <label>Qaysi hisobdan?</label>
+      <select id="fBucket"></select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel-modal" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn-confirm-modal income-btn" id="confirmBtn" onclick="confirmTxn()">Tasdiqlash</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, push, onValue, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const FIREBASE_URL = 'https://oilamoliyasi-8f864-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+const app = initializeApp({ databaseURL: FIREBASE_URL }, 'oila');
+const db = getDatabase(app);
+
+const BUCKETS = [
+  { id: 'safety',    label: 'Xavfsizlik yostiqchasi', pct: 0.10, color: '#378ADD', light: '#E6F1FB', dark: '#185FA5' },
+  { id: 'charity',   label: 'Ehson',                  pct: 0.05, color: '#1D9E75', light: '#E1F5EE', dark: '#0F6E56' },
+  { id: 'relax',     label: 'Maishiy hordiq',          pct: 0.05, color: '#D85A30', light: '#FAECE7', dark: '#993C1D' },
+  { id: 'household', label: "Ro'zg'or",               pct: 0.40, color: '#888780', light: '#F1EFE8', dark: '#444441' },
+  { id: 'capital',   label: 'Kapital/Investitsiya',   pct: 0.32, color: '#7F77DD', light: '#EEEDFE', dark: '#534AB7' },
+  { id: 'dream_s',   label: 'Kichik orzular',          pct: 0.04, color: '#D4537E', light: '#FBEAF0', dark: '#993556' },
+  { id: 'dream_b',   label: 'Katta orzular',           pct: 0.04, color: '#BA7517', light: '#FAEEDA', dark: '#854F0B' },
+];
+
+window.BUCKETS = BUCKETS;
+let balances = {};
+let allTxns = [];
+BUCKETS.forEach(b => balances[b.id] = 0);
+
+// Render buckets cards
+function renderBuckets() {
+  const grid = document.getElementById('bucketsGrid');
+  grid.innerHTML = BUCKETS.map(b => `
+    <div class="bucket-card" style="border-top-color:${b.color};">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${b.color};border-radius:14px 14px 0 0;"></div>
+      <div class="b-label">${b.label}</div>
+      <div class="b-amount">${fmtShort(balances[b.id])}</div>
+      <div class="b-pct" style="background:${b.light};color:${b.dark};">${Math.round(b.pct*100)}%</div>
+    </div>
+  `).join('');
+}
+
+function fmtShort(n) {
+  n = Math.round(n);
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(0) + 'K';
+  return n.toLocaleString();
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('uz-UZ') + " so'm";
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (allTxns.length === 0) {
+    list.innerHTML = '<div class="empty">Hali amaliyot yo\'q\nDaromad qo\'shish bilan boshlang 👆</div>';
+    return;
+  }
+  const sorted = [...allTxns].sort((a,b) => (b.ts||0)-(a.ts||0)).slice(0, 30);
+  list.innerHTML = sorted.map(h => {
+    const bkt = BUCKETS.find(b => b.id === h.bucket);
+    const bLabel = h.type === 'income' ? 'Barchaga taqsimlandi' : (bkt ? bkt.label : h.bucket);
+    const timeStr = h.ts ? new Date(h.ts).toLocaleDateString('uz-UZ', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+    return `
+      <div class="history-item">
+        <div class="h-left">
+          <div class="h-desc">${h.desc || (h.type==='income'?'Daromad':'Xarajat')}</div>
+          <div class="h-meta">${bLabel} · ${timeStr}</div>
+        </div>
+        <div class="h-amount ${h.type==='income'?'inc':'exp'}">${h.type==='income'?'+':'-'}${fmtShort(h.amount)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTotals() {
+  const inc = allTxns.filter(h=>h.type==='income').reduce((s,h)=>s+h.amount,0);
+  const exp = allTxns.filter(h=>h.type==='expense').reduce((s,h)=>s+h.amount,0);
+  document.getElementById('tIn').textContent = fmtShort(inc);
+  document.getElementById('tOut').textContent = fmtShort(exp);
+  const bal = inc - exp;
+  const el = document.getElementById('tBal');
+  el.textContent = fmtShort(Math.abs(bal));
+  el.style.color = bal >= 0 ? '#1D9E75' : '#D85A30';
+}
+
+// Firebase listener
+const txnRef = ref(db, 'transactions');
+onValue(txnRef, (snap) => {
+  document.getElementById('syncDot').classList.add('live');
+  balances = {};
+  BUCKETS.forEach(b => balances[b.id] = 0);
+  allTxns = [];
+  if (snap.exists()) {
+    snap.forEach(child => {
+      const d = child.val();
+      allTxns.push(d);
+      if (d.type === 'income') {
+        BUCKETS.forEach(b => { balances[b.id] += d.amount * b.pct; });
+      } else if (d.type === 'expense') {
+        if (balances[d.bucket] !== undefined) balances[d.bucket] -= d.amount;
+      }
+    });
+  }
+  renderBuckets();
+  renderHistory();
+  renderTotals();
+});
+
+// Modal
+let currentMode = 'income';
+window.openModal = function(mode) {
+  currentMode = mode;
+  document.getElementById('modalTitle').textContent = mode === 'income' ? "Daromad qo'shish" : 'Xarajat kiritish';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fAmount').value = '';
+  document.getElementById('bPreview').style.display = 'none';
+  const bg = document.getElementById('bucketGroup');
+  const confirmBtn = document.getElementById('confirmBtn');
+  if (mode === 'expense') {
+    bg.style.display = 'block';
+    confirmBtn.className = 'btn-confirm-modal expense-btn';
+    const sel = document.getElementById('fBucket');
+    sel.innerHTML = BUCKETS.map(b => `<option value="${b.id}">${b.label} — ${fmt(balances[b.id])}</option>`).join('');
+  } else {
+    bg.style.display = 'none';
+    confirmBtn.className = 'btn-confirm-modal income-btn';
+  }
+  document.getElementById('modalBg').classList.add('open');
+  setTimeout(() => document.getElementById('fDesc').focus(), 300);
+};
+
+window.closeModal = function() {
+  document.getElementById('modalBg').classList.remove('open');
+};
+
+window.updatePreview = function() {
+  const amt = parseFloat(document.getElementById('fAmount').value);
+  const preview = document.getElementById('bPreview');
+  if (!amt || currentMode !== 'income') { preview.style.display='none'; return; }
+  preview.style.display = 'block';
+  preview.innerHTML = BUCKETS.map(b => `
+    <div class="bp-row"><span>${b.label}</span><span>${fmt(amt * b.pct)}</span></div>
+  `).join('');
+};
+
+window.confirmTxn = async function() {
+  const desc = document.getElementById('fDesc').value.trim() || (currentMode==='income'?'Daromad':'Xarajat');
+  const amount = parseFloat(document.getElementById('fAmount').value);
+  if (!amount || amount <= 0) { showToast('Summa kiriting!'); return; }
+
+  if (currentMode === 'expense') {
+    const bid = document.getElementById('fBucket').value;
+    if (balances[bid] < amount) { showToast("Bu hisobda yetarli mablag' yo'q!"); return; }
+    await push(txnRef, { type: 'expense', desc, amount, bucket: bid, ts: Date.now() });
+    showToast('Xarajat kiritildi ✓');
+  } else {
+    await push(txnRef, { type: 'income', desc, amount, ts: Date.now() });
+    showToast('Daromad taqsimlandi ✓');
+  }
+  closeModal();
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.getElementById('modalBg').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
