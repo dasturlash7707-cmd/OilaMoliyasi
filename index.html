@@ -818,16 +818,6 @@ function hamyonQaytarish() {
   document.getElementById('h-qayt-summa').value = '';
   toast('✅ ' + fmt(summa) + ' ' + KASSA[kassa] + ' kassasiga qaytarildi');
 }
-  const sarf=parseFloat(document.getElementById('h-sarf').value)||0;
-  const hKey='hamyon-'+curOwner;
-  const hBal=balans[hKey]||0;
-  const rc=document.getElementById('h-result');
-  if(!sarf){rc.classList.remove('show');return;}
-  rc.classList.add('show');
-  document.getElementById('hr-bal').textContent=fmt(hBal);
-  document.getElementById('hr-sarf').textContent=fmt(sarf);
-  document.getElementById('hr-qoldiq').textContent=fmt(Math.max(0,hBal-sarf));
-}
 
 function hamyonOl(){
   const kassa=document.getElementById('h-kassa').value;
