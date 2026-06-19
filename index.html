@@ -8,888 +8,915 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <style>
 :root {
-  --bg: #0b0e1a;
-  --bg2: #131729;
-  --bg3: #1a1f35;
-  --bg4: #222840;
-  --text: #f0f2ff;
-  --text2: #9099b8;
-  --text3: #5a6280;
-  --accent: #5b8def;
-  --accent2: #3a6bd4;
-  --gold: #f0a93a;
-  --green: #3dd68c;
-  --red: #f0605a;
-  --border: rgba(255,255,255,0.07);
-  --radius: 16px;
-  --radius-sm: 10px;
+  --bg:#0b0e1a;--bg2:#131729;--bg3:#1a1f35;--bg4:#222840;
+  --text:#f0f2ff;--text2:#9099b8;--text3:#5a6280;
+  --accent:#5b8def;--gold:#f0a93a;--green:#3dd68c;--red:#f0605a;
+  --purple:#a78bfa;--orange:#fb923c;
+  --blue-h:#4a90d9;--pink-h:#d96a9e;
+  --border:rgba(255,255,255,0.07);--radius:16px;--rsm:10px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; }
-body {
-  font-family: -apple-system, 'SF Pro Display', 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  position: relative;
-}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);max-width:480px;margin:0 auto;min-height:100vh;}
+
+/* PIN SCREEN */
+#pin-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.pin-logo{font-size:48px;margin-bottom:12px;}
+.pin-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.pin-sub{font-size:13px;color:var(--text3);margin-bottom:32px;}
+.pin-dots{display:flex;gap:14px;margin-bottom:32px;}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--text3);transition:all 0.2s;}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);}
+.pin-dot.error{background:var(--red);border-color:var(--red);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;}
+.pin-btn{padding:18px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);font-size:22px;font-weight:700;color:var(--text);cursor:pointer;text-align:center;transition:background 0.15s;}
+.pin-btn:active{background:var(--bg4);}
+.pin-btn.del{font-size:18px;color:var(--text2);}
+.pin-btn.empty{background:transparent;border:none;cursor:default;}
+.pin-setup-hint{font-size:12px;color:var(--gold);margin-top:16px;text-align:center;}
 
 /* HEADER */
-.hdr {
-  background: var(--bg2);
-  padding: 14px 20px 10px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky; top: 0; z-index: 100;
-}
-.hdr-title { font-size: 17px; font-weight: 700; color: var(--text); }
-.hdr-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.hdr{background:var(--bg2);padding:12px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hdr-title{font-size:16px;font-weight:700;}
+.hdr-sub{font-size:10px;color:var(--text3);margin-top:1px;}
+.hdr-lock{background:none;border:none;font-size:20px;cursor:pointer;padding:4px;}
 
-/* BOTTOM NAV */
-.nav {
-  position: fixed;
-  bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  display: flex;
-  padding: 8px 0 12px;
-  z-index: 100;
-}
-.nav-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text3);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  transition: color 0.15s;
-}
-.nav-btn .icon { font-size: 22px; }
-.nav-btn.active { color: var(--accent); }
+/* NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding:6px 0 10px;z-index:100;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:9px;font-weight:600;}
+.nav-btn .ico{font-size:19px;}
+.nav-btn.active{color:var(--accent);}
 
-/* SCREENS */
-.screen { display: none; padding: 0 0 90px; }
-.screen.active { display: block; }
+.screen{display:none;padding:0 0 86px;}
+.screen.active{display:block;}
 
-/* BALANS SCREEN */
-.total-card {
-  margin: 16px;
-  background: linear-gradient(135deg, #1e2e5a, #162245);
-  border-radius: 20px;
-  padding: 24px 20px;
-  border: 1px solid rgba(91,141,239,0.25);
-}
-.total-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
-.total-amount { font-size: 38px; font-weight: 800; color: #fff; letter-spacing: -1px; line-height: 1; }
-.total-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 8px; }
+/* BALANS */
+.total-card{margin:12px;background:linear-gradient(135deg,#1e2e5a,#162245);border-radius:20px;padding:20px;border:1px solid rgba(91,141,239,0.25);}
+.total-lbl{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
+.total-num{font-size:34px;font-weight:800;color:#fff;letter-spacing:-1px;}
 
-.hamyon-card {
-  margin: 0 16px 4px;
-  background: linear-gradient(135deg, #2a1e0e, #1e1508);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  border: 1px solid rgba(240,169,58,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.hamyon-label { font-size: 12px; color: rgba(240,169,58,0.7); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-.hamyon-amount { font-size: 26px; font-weight: 800; color: var(--gold); }
-.hamyon-icon { font-size: 36px; opacity: 0.6; }
+.hamyon-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 12px 8px;}
+.h-card{border-radius:var(--radius);padding:12px;border:1px solid;}
+.h-card.ruslan{background:linear-gradient(135deg,#0d1e3a,#0a1628);border-color:rgba(74,144,217,0.35);}
+.h-card.xolida{background:linear-gradient(135deg,#2a0e1e,#1e0a15);border-color:rgba(217,106,158,0.35);}
+.h-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
+.h-card.ruslan .h-name{color:var(--blue-h);}
+.h-card.xolida .h-name{color:var(--pink-h);}
+.h-ico{font-size:20px;margin-bottom:4px;}
+.h-amt{font-size:18px;font-weight:800;}
+.h-card.ruslan .h-amt{color:var(--blue-h);}
+.h-card.xolida .h-amt{color:var(--pink-h);}
 
-.section-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 12px 16px 8px;
-}
+/* QARZ MINI */
+.qarz-mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 12px 8px;}
+.qm-card{border-radius:var(--rsm);padding:12px;border:1px solid;}
+.qm-card.bizdan{background:rgba(240,96,90,0.08);border-color:rgba(240,96,90,0.25);}
+.qm-card.bizga{background:rgba(61,214,140,0.08);border-color:rgba(61,214,140,0.25);}
+.qm-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;}
+.qm-card.bizdan .qm-lbl{color:var(--red);}
+.qm-card.bizga .qm-lbl{color:var(--green);}
+.qm-amt{font-size:16px;font-weight:800;}
+.qm-card.bizdan .qm-amt{color:var(--red);}
+.qm-card.bizga .qm-amt{color:var(--green);}
+.qm-cnt{font-size:10px;color:var(--text3);margin-top:2px;}
 
-.kassalar {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  padding: 0 16px;
-}
-.kassa-card {
-  background: var(--bg3);
-  border-radius: var(--radius);
-  padding: 16px 14px;
-  border: 1px solid var(--border);
-  transition: background 0.15s;
-}
-.kassa-card:active { background: var(--bg4); }
-.kassa-icon { font-size: 24px; margin-bottom: 8px; }
-.kassa-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.kassa-amount { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
-.kassa-pct { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.sec-title{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:10px 12px 6px;}
+.kassalar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px;}
+.k-card{background:var(--bg3);border-radius:var(--radius);padding:12px;border:1px solid var(--border);}
+.k-ico{font-size:20px;margin-bottom:5px;}
+.k-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px;}
+.k-amt{font-size:17px;font-weight:800;color:var(--text);}
+.k-pct{font-size:10px;color:var(--text3);margin-top:1px;}
 
 /* FORMS */
-.form-screen { padding: 16px 16px 90px; }
-.form-type-toggle {
-  display: flex;
-  background: var(--bg3);
-  border-radius: var(--radius-sm);
-  padding: 4px;
-  margin-bottom: 20px;
-}
-.type-btn {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text2);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.type-btn.active.income { background: rgba(61,214,140,0.15); color: var(--green); }
-.type-btn.active.expense { background: rgba(240,96,90,0.15); color: var(--red); }
-.type-btn.active.hamyon { background: rgba(240,169,58,0.15); color: var(--gold); }
+.fscr{padding:12px 12px 86px;}
+.toggle-row{display:flex;background:var(--bg3);border-radius:var(--rsm);padding:3px;margin-bottom:16px;}
+.tog-btn{flex:1;padding:8px;border:none;border-radius:7px;background:transparent;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;}
+.tog-btn.active.inc{background:rgba(61,214,140,0.15);color:var(--green);}
+.tog-btn.active.exp{background:rgba(240,96,90,0.15);color:var(--red);}
+.flbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:block;}
+.fgrp{margin-bottom:12px;}
+.finput{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:12px 13px;color:var(--text);font-size:15px;outline:none;transition:border-color 0.15s;}
+.finput:focus{border-color:var(--accent);}
+.finput.big{font-size:24px;font-weight:800;text-align:center;}
+.fselect{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:12px 13px;color:var(--text);font-size:14px;outline:none;}
+.pay-row{display:flex;gap:7px;}
+.pbtn{flex:1;padding:10px;border:1px solid var(--border);border-radius:var(--rsm);background:transparent;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;}
+.pbtn.active{border-color:var(--accent);background:rgba(91,141,239,0.12);color:var(--accent);}
+.kbal-hint{font-size:12px;color:var(--gold);margin-top:5px;padding:5px 9px;background:rgba(240,169,58,0.08);border-radius:6px;display:none;}
+.kbal-hint.show{display:block;}
+.preview{background:var(--bg3);border-radius:var(--rsm);padding:11px;margin-bottom:12px;border:1px solid var(--border);display:none;}
+.preview.show{display:block;}
+.prev-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);}
+.prev-row:last-child{border-bottom:none;}
+.prev-val{color:var(--green);font-weight:700;}
+.abtn{width:100%;padding:14px;border:none;border-radius:var(--radius);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.15s,transform 0.1s;}
+.abtn:active{opacity:0.85;transform:scale(0.98);}
+.btn-g{background:var(--green);color:#051a0e;}
+.btn-r{background:var(--red);color:#fff;}
+.btn-b{background:var(--blue-h);color:#fff;}
+.btn-gold{background:var(--gold);color:#1a0e00;}
+.btn-pur{background:var(--purple);color:#1a0030;}
 
-.field-group { margin-bottom: 16px; }
-.field-label { font-size: 12px; color: var(--text3); margin-bottom: 8px; display: block; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.field-input {
-  width: 100%;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  color: var(--text);
-  font-size: 18px;
-  font-weight: 600;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.field-input:focus { border-color: var(--accent); }
-.field-input.big { font-size: 28px; font-weight: 800; text-align: center; letter-spacing: -0.5px; }
-.field-select {
-  width: 100%;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  color: var(--text);
-  font-size: 16px;
-  outline: none;
-  -webkit-appearance: none;
-}
-.pay-btns { display: flex; gap: 8px; }
-.pay-btn {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text2);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.pay-btn.active { border-color: var(--accent); background: rgba(91,141,239,0.12); color: var(--accent); }
-.pay-btn.gold.active { border-color: var(--gold); background: rgba(240,169,58,0.12); color: var(--gold); }
+/* HAMYON */
+.hscr{padding:12px 12px 86px;}
+.owner-tabs{display:flex;background:var(--bg3);border-radius:var(--rsm);padding:3px;margin-bottom:14px;}
+.owner-btn{flex:1;padding:9px;border:none;border-radius:7px;background:transparent;font-size:13px;font-weight:700;cursor:pointer;color:var(--text2);}
+.owner-btn.active.ruslan{background:rgba(74,144,217,0.2);color:var(--blue-h);}
+.owner-btn.active.xolida{background:rgba(217,106,158,0.2);color:var(--pink-h);}
+.h-big{border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:14px;border:1px solid;}
+.h-big.ruslan{background:linear-gradient(135deg,#0d1e3a,#0a1628);border-color:rgba(74,144,217,0.3);}
+.h-big.xolida{background:linear-gradient(135deg,#2a0e1e,#1e0a15);border-color:rgba(217,106,158,0.3);}
+.h-big-lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;}
+.h-big.ruslan .h-big-lbl{color:rgba(74,144,217,0.7);}
+.h-big.xolida .h-big-lbl{color:rgba(217,106,158,0.7);}
+.h-big-num{font-size:36px;font-weight:900;letter-spacing:-2px;}
+.h-big.ruslan .h-big-num{color:var(--blue-h);}
+.h-big.xolida .h-big-num{color:var(--pink-h);}
+.step-blk{background:var(--bg3);border-radius:var(--radius);padding:13px;margin-bottom:9px;border:1px solid var(--border);}
+.step-ttl{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.snum{width:18px;height:18px;border-radius:50%;background:rgba(240,169,58,0.15);color:var(--gold);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.res-blk{background:rgba(61,214,140,0.06);border-radius:var(--rsm);border:1px solid rgba(61,214,140,0.2);padding:11px;margin:9px 0;display:none;}
+.res-blk.show{display:block;}
+.res-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
+.rv{font-weight:700;}
+.rv.pos{color:var(--green);font-size:17px;}
+.rv.neg{color:var(--red);}
+.rv.gold{color:var(--gold);}
+.btn-row{display:flex;gap:8px;margin-top:4px;}
+.btn-row .abtn{flex:1;padding:11px 5px;font-size:12px;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
 
-/* PREVIEW */
-.preview-box {
-  background: var(--bg3);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  margin-bottom: 16px;
-  border: 1px solid var(--border);
-  display: none;
-}
-.preview-box.show { display: block; }
-.preview-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-}
-.preview-row:last-child { border-bottom: none; }
-.preview-val { color: var(--green); font-weight: 700; font-size: 15px; }
-
-/* ACTION BTN */
-.action-btn {
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 17px;
-  font-weight: 800;
-  cursor: pointer;
-  letter-spacing: -0.3px;
-  transition: opacity 0.15s, transform 0.1s;
-}
-.action-btn:active { opacity: 0.85; transform: scale(0.98); }
-.btn-blue { background: var(--accent); color: #fff; }
-.btn-green { background: var(--green); color: #0a2018; }
-.btn-red { background: var(--red); color: #fff; }
-.btn-gold { background: var(--gold); color: #1a0e00; }
-
-/* HAMYON SCREEN */
-.hamyon-screen { padding: 16px 16px 90px; }
-.hamyon-big {
-  background: var(--bg3);
-  border-radius: var(--radius);
-  padding: 20px;
-  text-align: center;
-  border: 1px solid rgba(240,169,58,0.2);
-  margin-bottom: 20px;
-}
-.hamyon-big-label { font-size: 12px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-.hamyon-big-num { font-size: 44px; font-weight: 900; color: var(--gold); letter-spacing: -2px; }
-
-.step-card {
-  background: var(--bg3);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 1px solid var(--border);
-}
-.step-card-title { font-size: 12px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(240,169,58,0.15); color: var(--gold); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-.result-card {
-  background: rgba(61,214,140,0.06);
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(61,214,140,0.2);
-  padding: 14px;
-  margin: 12px 0;
-  display: none;
-}
-.result-card.show { display: block; }
-.result-row { display: flex; justify-content: space-between; font-size: 14px; padding: 5px 0; }
-.result-row .rv { font-weight: 700; }
-.rv.pos { color: var(--green); }
-.rv.neg { color: var(--red); }
-.rv.gold { color: var(--gold); }
-
-.btn-row { display: flex; gap: 10px; margin-top: 4px; }
-.btn-row .action-btn { flex: 1; padding: 14px 8px; font-size: 14px; }
+/* QARZ */
+.qscr{padding:12px 12px 86px;}
+.qarz-tabs{display:flex;background:var(--bg3);border-radius:var(--rsm);padding:3px;margin-bottom:14px;}
+.qarz-tab{flex:1;padding:8px;border:none;border-radius:7px;background:transparent;font-size:12px;font-weight:700;cursor:pointer;color:var(--text2);}
+.qarz-tab.active.bizdan{background:rgba(240,96,90,0.15);color:var(--red);}
+.qarz-tab.active.bizga{background:rgba(61,214,140,0.15);color:var(--green);}
+.qarz-tab.active.add{background:rgba(167,139,250,0.15);color:var(--purple);}
+.qarz-item{background:var(--bg3);border-radius:var(--radius);padding:14px;margin-bottom:9px;border:1px solid var(--border);}
+.qarz-item.bizdan{border-left:3px solid var(--red);}
+.qarz-item.bizga{border-left:3px solid var(--green);}
+.qi-name{font-size:15px;font-weight:700;margin-bottom:3px;}
+.qi-amt{font-size:20px;font-weight:800;margin-bottom:4px;}
+.qi-amt.bizdan{color:var(--red);}
+.qi-amt.bizga{color:var(--green);}
+.qi-meta{font-size:11px;color:var(--text3);}
+.qi-actions{display:flex;gap:7px;margin-top:10px;}
+.qi-btn{flex:1;padding:8px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;}
+.qi-btn.pay{background:rgba(61,214,140,0.15);color:var(--green);}
+.qi-btn.del{background:rgba(240,96,90,0.1);color:var(--red);}
+.qi-btn.edit{background:rgba(91,141,239,0.12);color:var(--accent);}
+.qarz-total{background:var(--bg3);border-radius:var(--rsm);padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);}
+.qt-lbl{font-size:11px;color:var(--text3);}
+.qt-amt{font-size:18px;font-weight:800;}
+.curr-toggle{display:flex;gap:6px;margin-bottom:8px;}
+.curr-btn{padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;}
+.curr-btn.active{border-color:var(--gold);background:rgba(240,169,58,0.12);color:var(--gold);}
 
 /* TARIX */
-.tarix-screen { padding: 0 16px 90px; }
-.filter-chips { display: flex; gap: 8px; padding: 14px 0 8px; overflow-x: auto; }
-.chip {
-  flex-shrink: 0;
-  padding: 7px 16px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: transparent;
-  color: var(--text2);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.chip.active { border-color: var(--accent); background: rgba(91,141,239,0.12); color: var(--accent); }
+.tscr{padding:0 12px 86px;}
+.chips{display:flex;gap:7px;padding:11px 0 7px;overflow-x:auto;}
+.chip{flex-shrink:0;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;}
+.chip.active{border-color:var(--accent);background:rgba(91,141,239,0.12);color:var(--accent);}
+.chip.ruslan-a{border-color:var(--blue-h);background:rgba(74,144,217,0.12);color:var(--blue-h);}
+.chip.xolida-a{border-color:var(--pink-h);background:rgba(217,106,158,0.12);color:var(--pink-h);}
+.date-row{display:flex;gap:7px;margin-bottom:10px;}
+.date-row input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:7px 9px;color:var(--text);font-size:11px;outline:none;}
+.date-row button{padding:7px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);color:var(--text2);font-size:11px;cursor:pointer;}
+.t-cols{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.t-hdr{font-size:10px;font-weight:700;padding:6px;text-align:center;border-radius:var(--rsm);margin-bottom:7px;}
+.t-hdr.inc{background:rgba(61,214,140,0.1);color:var(--green);}
+.t-hdr.exp{background:rgba(240,96,90,0.1);color:var(--red);}
+.t-total{font-size:10px;display:block;opacity:0.7;margin-top:1px;}
+.tx{background:var(--bg3);border-radius:var(--rsm);padding:8px 9px;margin-bottom:6px;border-left:3px solid var(--border);}
+.tx.inc{border-left-color:var(--green);}
+.tx.exp{border-left-color:var(--red);}
+.tx.hr{border-left-color:var(--blue-h);}
+.tx.hx{border-left-color:var(--pink-h);}
+.tx-s{font-size:14px;font-weight:800;}
+.tx-s.inc{color:var(--green);}
+.tx-s.exp{color:var(--red);}
+.tx-s.hr{color:var(--blue-h);}
+.tx-s.hx{color:var(--pink-h);}
+.tx-d{font-size:11px;color:var(--text2);margin-top:1px;}
+.tx-m{font-size:10px;color:var(--text3);margin-top:2px;}
+.tag{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10px;background:rgba(255,255,255,0.06);color:var(--text3);margin-top:2px;margin-right:2px;}
+.empty{text-align:center;color:var(--text3);font-size:12px;padding:18px 0;}
 
-.date-row { display: flex; gap: 8px; margin-bottom: 12px; }
-.date-row input {
-  flex: 1;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  color: var(--text);
-  font-size: 13px;
-  outline: none;
-}
-.date-row button {
-  padding: 8px 12px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text2);
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.tarix-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.t-col-hdr {
-  font-size: 12px;
-  font-weight: 700;
-  padding: 8px 0;
-  text-align: center;
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-}
-.t-col-hdr.inc { background: rgba(61,214,140,0.1); color: var(--green); }
-.t-col-hdr.exp { background: rgba(240,96,90,0.1); color: var(--red); }
-.t-col-total { font-size: 10px; display: block; opacity: 0.7; margin-top: 2px; }
-
-.tx-card {
-  background: var(--bg3);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  border-left: 3px solid var(--border);
-}
-.tx-card.inc { border-left-color: var(--green); }
-.tx-card.exp { border-left-color: var(--red); }
-.tx-card.hmy { border-left-color: var(--gold); }
-.tx-sum { font-size: 16px; font-weight: 800; }
-.tx-sum.inc { color: var(--green); }
-.tx-sum.exp { color: var(--red); }
-.tx-sum.hmy { color: var(--gold); }
-.tx-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
-.tx-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
-.tx-tag {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  background: rgba(255,255,255,0.06);
-  color: var(--text3);
-  margin-top: 3px;
-  margin-right: 3px;
-}
-
-.empty { text-align: center; color: var(--text3); font-size: 13px; padding: 24px 0; }
-
-/* NOTIFY */
-.toast {
-  position: fixed;
-  bottom: 100px;
-  left: 50%; transform: translateX(-50%);
-  background: var(--green);
-  color: #051a0e;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 14px;
-  font-weight: 700;
-  z-index: 999;
-  opacity: 0;
-  pointer-events: none;
-  white-space: nowrap;
-  transition: opacity 0.25s;
-}
-.toast.err { background: var(--red); color: #fff; }
-.toast.show { opacity: 1; }
+.toast{position:fixed;bottom:94px;left:50%;transform:translateX(-50%);background:var(--green);color:#051a0e;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;z-index:9999;opacity:0;pointer-events:none;white-space:nowrap;transition:opacity 0.25s;max-width:90%;}
+.toast.err{background:var(--red);color:#fff;}
+.toast.show{opacity:1;}
 </style>
 </head>
 <body>
 
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="pin-logo">💰</div>
+  <div class="pin-title" id="pin-title">Oila Moliyasi</div>
+  <div class="pin-sub" id="pin-sub">PIN kodingizni kiriting</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pinPress('1')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')">2</button>
+    <button class="pin-btn" onclick="pinPress('3')">3</button>
+    <button class="pin-btn" onclick="pinPress('4')">4</button>
+    <button class="pin-btn" onclick="pinPress('5')">5</button>
+    <button class="pin-btn" onclick="pinPress('6')">6</button>
+    <button class="pin-btn" onclick="pinPress('7')">7</button>
+    <button class="pin-btn" onclick="pinPress('8')">8</button>
+    <button class="pin-btn" onclick="pinPress('9')">9</button>
+    <div class="pin-btn empty"></div>
+    <button class="pin-btn" onclick="pinPress('0')">0</button>
+    <button class="pin-btn del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-setup-hint" id="pin-hint"></div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
 <div class="hdr">
   <div>
     <div class="hdr-title">💰 Oila Moliyasi</div>
     <div class="hdr-sub" id="hdr-date"></div>
   </div>
-  <div style="font-size:28px">🏠</div>
+  <button class="hdr-lock" onclick="lockApp()" title="Qulflaish">🔒</button>
 </div>
 
 <!-- BALANS -->
 <div id="s-balans" class="screen active">
   <div class="total-card">
-    <div class="total-label">Umumiy balans</div>
-    <div class="total-amount" id="b-total">0 so'm</div>
-    <div class="total-sub" id="b-total-sub">Barcha kassalar yig'indisi</div>
+    <div class="total-lbl">Umumiy balans</div>
+    <div class="total-num" id="b-total">0 so'm</div>
   </div>
-
-  <div class="hamyon-card">
-    <div>
-      <div class="hamyon-label">👜 Hamyon — Qo'ldagi naqt</div>
-      <div class="hamyon-amount" id="b-hamyon">0 so'm</div>
+  <div class="hamyon-pair">
+    <div class="h-card ruslan"><div class="h-ico">👔</div><div class="h-name">Ruslan hamyoni</div><div class="h-amt" id="b-hruslan">0 so'm</div></div>
+    <div class="h-card xolida"><div class="h-ico">👜</div><div class="h-name">Xolida hamyoni</div><div class="h-amt" id="b-hxolida">0 so'm</div></div>
+  </div>
+  <div class="qarz-mini">
+    <div class="qm-card bizdan" onclick="goToQarz('bizdan')">
+      <div class="qm-lbl">🔴 Biz qarzdormiz</div>
+      <div class="qm-amt" id="qm-bizdan">0</div>
+      <div class="qm-cnt" id="qm-bizdan-cnt"></div>
     </div>
-    <div class="hamyon-icon">💵</div>
+    <div class="qm-card bizga" onclick="goToQarz('bizga')">
+      <div class="qm-lbl">🟢 Bizga qarzdor</div>
+      <div class="qm-amt" id="qm-bizga">0</div>
+      <div class="qm-cnt" id="qm-bizga-cnt"></div>
+    </div>
   </div>
-
-  <div class="section-title">Kassalar</div>
+  <div class="sec-title">Kassalar</div>
   <div class="kassalar">
-    <div class="kassa-card">
-      <div class="kassa-icon">🛡️</div>
-      <div class="kassa-label">Xavfsizlik</div>
-      <div class="kassa-amount" id="b-xavfsizlik">0</div>
-      <div class="kassa-pct">10%</div>
-    </div>
-    <div class="kassa-card">
-      <div class="kassa-icon">🤲</div>
-      <div class="kassa-label">Ehson</div>
-      <div class="kassa-amount" id="b-ehson">0</div>
-      <div class="kassa-pct">5%</div>
-    </div>
-    <div class="kassa-card">
-      <div class="kassa-icon">🌴</div>
-      <div class="kassa-label">Hordiq</div>
-      <div class="kassa-amount" id="b-hordiq">0</div>
-      <div class="kassa-pct">5%</div>
-    </div>
-    <div class="kassa-card">
-      <div class="kassa-icon">🏠</div>
-      <div class="kassa-label">Ro'zg'or</div>
-      <div class="kassa-amount" id="b-rozgor">0</div>
-      <div class="kassa-pct">40%</div>
-    </div>
-    <div class="kassa-card">
-      <div class="kassa-icon">📈</div>
-      <div class="kassa-label">Kapital</div>
-      <div class="kassa-amount" id="b-kapital">0</div>
-      <div class="kassa-pct">32%</div>
-    </div>
-    <div class="kassa-card">
-      <div class="kassa-icon">⭐</div>
-      <div class="kassa-label">Kichik orzu</div>
-      <div class="kassa-amount" id="b-kichik">0</div>
-      <div class="kassa-pct">4%</div>
-    </div>
-    <div class="kassa-card" style="grid-column:1/-1;">
-      <div class="kassa-icon">🌟</div>
-      <div class="kassa-label">Katta orzu</div>
-      <div class="kassa-amount" id="b-katta">0</div>
-      <div class="kassa-pct">4%</div>
-    </div>
+    <div class="k-card"><div class="k-ico">🛡️</div><div class="k-lbl">Xavfsizlik</div><div class="k-amt" id="b-xavfsizlik">0</div><div class="k-pct">10%</div></div>
+    <div class="k-card"><div class="k-ico">🤲</div><div class="k-lbl">Ehson</div><div class="k-amt" id="b-ehson">0</div><div class="k-pct">5%</div></div>
+    <div class="k-card"><div class="k-ico">🌴</div><div class="k-lbl">Hordiq</div><div class="k-amt" id="b-hordiq">0</div><div class="k-pct">5%</div></div>
+    <div class="k-card"><div class="k-ico">🏠</div><div class="k-lbl">Ro'zg'or</div><div class="k-amt" id="b-rozgor">0</div><div class="k-pct">35%</div></div>
+    <div class="k-card"><div class="k-ico">👴</div><div class="k-lbl">Ota-ona</div><div class="k-amt" id="b-otaona">0</div><div class="k-pct">5%</div></div>
+    <div class="k-card"><div class="k-ico">📈</div><div class="k-lbl">Kapital</div><div class="k-amt" id="b-kapital">0</div><div class="k-pct">28%</div></div>
+    <div class="k-card"><div class="k-ico">⭐</div><div class="k-lbl">Kichik orzu</div><div class="k-amt" id="b-kichik">0</div><div class="k-pct">4%</div></div>
+    <div class="k-card" style="grid-column:1/-1"><div class="k-ico">🌟</div><div class="k-lbl">Katta orzu</div><div class="k-amt" id="b-katta">0</div><div class="k-pct">4%</div></div>
   </div>
 </div>
 
-<!-- DAROMAD / XARAJAT -->
+<!-- KIRIM/CHIQIM -->
 <div id="s-kirim" class="screen">
-  <div class="form-screen">
-    <div class="form-type-toggle">
-      <button class="type-btn income active" onclick="switchMode('income',this)">➕ Daromad</button>
-      <button class="type-btn expense" onclick="switchMode('expense',this)">➖ Xarajat</button>
+  <div class="fscr">
+    <div class="toggle-row">
+      <button class="tog-btn inc active" onclick="switchMode('income',this)">➕ Daromad</button>
+      <button class="tog-btn exp" onclick="switchMode('expense',this)">➖ Xarajat</button>
     </div>
-
-    <!-- income fields -->
     <div id="mode-income">
-      <div class="field-group">
-        <label class="field-label">Summa</label>
-        <input class="field-input big" type="number" id="d-summa" placeholder="0" inputmode="numeric" oninput="previewTaq()">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Izoh</label>
-        <input class="field-input" type="text" id="d-izoh" placeholder="Masalan: Oylik maosh">
-      </div>
-      <div class="field-group">
-        <label class="field-label">To'lov turi</label>
-        <div class="pay-btns">
-          <button class="pay-btn active" onclick="setPay('d','naqt',this)">💵 Naqt</button>
-          <button class="pay-btn" onclick="setPay('d','plastik',this)">💳 Plastik</button>
+      <div class="fgrp"><label class="flbl">Summa</label><input class="finput big" type="number" id="d-summa" placeholder="0" inputmode="numeric" oninput="previewTaq()"></div>
+      <div class="fgrp"><label class="flbl">Izoh</label><input class="finput" type="text" id="d-izoh" placeholder="Masalan: Oylik maosh"></div>
+      <div class="fgrp"><label class="flbl">To'lov turi</label>
+        <div class="pay-row">
+          <button class="pbtn active" onclick="setPay('d','naqt',this)">💵 Naqt</button>
+          <button class="pbtn" onclick="setPay('d','plastik',this)">💳 Plastik</button>
         </div>
       </div>
-      <div class="preview-box" id="taq-preview">
-        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Taqsimlash</div>
-        <div class="preview-row"><span>🛡️ Xavfsizlik</span><span class="preview-val" id="p-x">—</span></div>
-        <div class="preview-row"><span>🤲 Ehson</span><span class="preview-val" id="p-e">—</span></div>
-        <div class="preview-row"><span>🌴 Hordiq</span><span class="preview-val" id="p-h">—</span></div>
-        <div class="preview-row"><span>🏠 Ro'zg'or</span><span class="preview-val" id="p-r">—</span></div>
-        <div class="preview-row"><span>📈 Kapital</span><span class="preview-val" id="p-k">—</span></div>
-        <div class="preview-row"><span>⭐ Kichik orzu</span><span class="preview-val" id="p-ki">—</span></div>
-        <div class="preview-row"><span>🌟 Katta orzu</span><span class="preview-val" id="p-ka">—</span></div>
+      <div class="preview" id="taq-preview">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px">Taqsimlash</div>
+        <div class="prev-row"><span>🛡️ Xavfsizlik 10%</span><span class="prev-val" id="p-x">—</span></div>
+        <div class="prev-row"><span>🤲 Ehson 5%</span><span class="prev-val" id="p-e">—</span></div>
+        <div class="prev-row"><span>🌴 Hordiq 5%</span><span class="prev-val" id="p-h">—</span></div>
+        <div class="prev-row"><span>🏠 Ro'zg'or 35%</span><span class="prev-val" id="p-r">—</span></div>
+        <div class="prev-row"><span>👴 Ota-ona 5%</span><span class="prev-val" id="p-oo">—</span></div>
+        <div class="prev-row"><span>📈 Kapital 28%</span><span class="prev-val" id="p-k">—</span></div>
+        <div class="prev-row"><span>⭐ Kichik orzu 4%</span><span class="prev-val" id="p-ki">—</span></div>
+        <div class="prev-row"><span>🌟 Katta orzu 4%</span><span class="prev-val" id="p-ka">—</span></div>
       </div>
-      <button class="action-btn btn-green" onclick="addDaromad()">✅ Daromad qo'shish</button>
+      <button class="abtn btn-g" onclick="addDaromad()">✅ Daromad qo'shish</button>
     </div>
-
-    <!-- expense fields -->
     <div id="mode-expense" style="display:none">
-      <div class="field-group">
-        <label class="field-label">Qaysi kassadan</label>
-        <select class="field-select" id="x-hisob">
-          <option value="xavfsizlik">🛡️ Xavfsizlik yostiqchasi</option>
+      <div class="fgrp">
+        <label class="flbl">Qaysi kassadan</label>
+        <select class="fselect" id="x-hisob" onchange="showKbal('x-hisob','xkbal')">
+          <option value="xavfsizlik">🛡️ Xavfsizlik</option>
           <option value="ehson">🤲 Ehson</option>
-          <option value="hordiq">🌴 Maishiy hordiq</option>
+          <option value="hordiq">🌴 Hordiq</option>
           <option value="rozgor" selected>🏠 Ro'zg'or</option>
-          <option value="kapital">📈 Kapital / Investitsiya</option>
-          <option value="kichik">⭐ Kichik orzular</option>
-          <option value="katta">🌟 Katta orzular</option>
-          <option value="hamyon">👜 Hamyon (qo'ldagi naqt)</option>
+          <option value="otaona">👴 Ota-ona</option>
+          <option value="kapital">📈 Kapital</option>
+          <option value="kichik">⭐ Kichik orzu</option>
+          <option value="katta">🌟 Katta orzu</option>
+          <option value="hamyon-ruslan">👔 Ruslan hamyoni</option>
+          <option value="hamyon-xolida">👜 Xolida hamyoni</option>
         </select>
+        <div class="kbal-hint" id="xkbal"></div>
       </div>
-      <div class="field-group">
-        <label class="field-label">Summa</label>
-        <input class="field-input big" type="number" id="x-summa" placeholder="0" inputmode="numeric">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Izoh</label>
-        <input class="field-input" type="text" id="x-izoh" placeholder="Nima uchun sarflandi?">
-      </div>
-      <div class="field-group">
-        <label class="field-label">To'lov turi</label>
-        <div class="pay-btns">
-          <button class="pay-btn active" onclick="setPay('x','naqt',this)">💵 Naqt</button>
-          <button class="pay-btn" onclick="setPay('x','plastik',this)">💳 Plastik</button>
+      <div class="fgrp"><label class="flbl">Summa</label><input class="finput big" type="number" id="x-summa" placeholder="0" inputmode="numeric"></div>
+      <div class="fgrp"><label class="flbl">Izoh</label><input class="finput" type="text" id="x-izoh" placeholder="Nima uchun sarflandi?"></div>
+      <div class="fgrp"><label class="flbl">To'lov turi</label>
+        <div class="pay-row">
+          <button class="pbtn active" onclick="setPay('x','naqt',this)">💵 Naqt</button>
+          <button class="pbtn" onclick="setPay('x','plastik',this)">💳 Plastik</button>
         </div>
       </div>
-      <button class="action-btn btn-red" onclick="addXarajat()">✅ Xarajat kiritish</button>
+      <button class="abtn btn-r" onclick="addXarajat()">✅ Xarajat kiritish</button>
     </div>
   </div>
 </div>
 
 <!-- HAMYON -->
 <div id="s-hamyon" class="screen">
-  <div class="hamyon-screen">
-    <div class="hamyon-big">
-      <div class="hamyon-big-label">Hamyondagi naqt pul</div>
-      <div class="hamyon-big-num" id="h-balans-big">0</div>
-      <div style="font-size:12px;color:rgba(240,169,58,0.5);margin-top:6px">so'm</div>
+  <div class="hscr">
+    <div class="hamyon-pair" style="margin:0 0 14px">
+      <div class="h-card ruslan" style="text-align:center"><div class="h-ico">👔</div><div class="h-name">Ruslan</div><div class="h-amt" id="hb-ruslan">0 so'm</div></div>
+      <div class="h-card xolida" style="text-align:center"><div class="h-ico">👜</div><div class="h-name">Xolida</div><div class="h-amt" id="hb-xolida">0 so'm</div></div>
+    </div>
+    <div class="owner-tabs">
+      <button class="owner-btn ruslan active" onclick="setOwner('ruslan',this)">👔 Ruslan</button>
+      <button class="owner-btn xolida" onclick="setOwner('xolida',this)">👜 Xolida</button>
     </div>
 
-    <div class="step-card">
-      <div class="step-card-title">
-        <span class="step-num">1</span>
-        Qaysi kassadan pul olasiz?
-      </div>
-      <select class="field-select" id="h-kassa" onchange="calcHamyon()">
+    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">📤 Kassadan pul olish</div>
+    <div class="step-blk">
+      <div class="step-ttl"><span class="snum">1</span>Qaysi kassadan?</div>
+      <select class="fselect" id="h-kassa" onchange="showKbal('h-kassa','hkbal')">
         <option value="">— Kassani tanlang —</option>
         <option value="xavfsizlik">🛡️ Xavfsizlik</option>
         <option value="ehson">🤲 Ehson</option>
         <option value="hordiq">🌴 Hordiq</option>
         <option value="rozgor">🏠 Ro'zg'or</option>
+        <option value="otaona">👴 Ota-ona</option>
+        <option value="kapital">📈 Kapital</option>
+        <option value="kichik">⭐ Kichik orzu</option>
+        <option value="katta">🌟 Katta orzu</option>
+      </select>
+      <div class="kbal-hint" id="hkbal"></div>
+    </div>
+    <div class="step-blk">
+      <div class="step-ttl"><span class="snum">2</span>Qancha olasiz?</div>
+      <input class="finput big" type="number" id="h-olgan" placeholder="0" inputmode="numeric">
+    </div>
+    <button class="abtn btn-b" style="margin-bottom:14px" onclick="hamyonOl()">📤 Hamyonga pul olish</button>
+
+    <div class="divider"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">💸 Hamyondan sarflash</div>
+    <div class="step-blk">
+      <div class="step-ttl"><span class="snum">1</span>Qancha sarflaysiz?</div>
+      <input class="finput big" type="number" id="h-sarf" placeholder="0" inputmode="numeric" oninput="calcHamyon()">
+    </div>
+    <div class="step-blk">
+      <div class="step-ttl"><span class="snum">2</span>Izoh — nima uchun?</div>
+      <input class="finput" type="text" id="h-izoh" placeholder="Masalan: Bozorga bordim">
+    </div>
+    <div class="res-blk" id="h-result">
+      <div class="res-row"><span>Hamyondagi pul</span><span class="rv gold" id="hr-bal">—</span></div>
+      <div class="res-row"><span>Sarflanadi</span><span class="rv neg" id="hr-sarf">—</span></div>
+      <div style="border-top:1px solid rgba(61,214,140,0.2);padding-top:7px;margin-top:3px" class="res-row"><span style="font-weight:700">Qoldiq</span><span class="rv pos" id="hr-qoldiq">—</span></div>
+    </div>
+    <div class="step-blk">
+      <div class="step-ttl"><span class="snum">3</span>Qoldiq qaysi kassaga qaytsin?</div>
+      <select class="fselect" id="h-qayt">
+        <option value="">— Qaytarmaslik —</option>
+        <option value="xavfsizlik">🛡️ Xavfsizlik</option>
+        <option value="ehson">🤲 Ehson</option>
+        <option value="hordiq">🌴 Hordiq</option>
+        <option value="rozgor" selected>🏠 Ro'zg'or</option>
+        <option value="otaona">👴 Ota-ona</option>
         <option value="kapital">📈 Kapital</option>
         <option value="kichik">⭐ Kichik orzu</option>
         <option value="katta">🌟 Katta orzu</option>
       </select>
     </div>
+    <button class="abtn btn-r" onclick="hamyonSarf()">💸 Sarflash & Qoldiqni qaytarish</button>
+  </div>
+</div>
 
-    <div class="step-card">
-      <div class="step-card-title"><span class="step-num">2</span>Kassadan qancha olasiz?</div>
-      <input class="field-input big" type="number" id="h-olgan" placeholder="0" inputmode="numeric" oninput="calcHamyon()">
+<!-- QARZ -->
+<div id="s-qarz" class="screen">
+  <div class="qscr">
+    <div class="qarz-tabs">
+      <button class="qarz-tab bizdan active" onclick="switchQarz('bizdan',this)">🔴 Biz qarzdor</button>
+      <button class="qarz-tab bizga" onclick="switchQarz('bizga',this)">🟢 Bizga qarzdor</button>
+      <button class="qarz-tab add" onclick="switchQarz('add',this)">➕ Qo'shish</button>
     </div>
 
-    <div class="step-card">
-      <div class="step-card-title"><span class="step-num">3</span>Qancha sarflaysiz?</div>
-      <input class="field-input big" type="number" id="h-sarf" placeholder="0" inputmode="numeric" oninput="calcHamyon()">
+    <div id="qarz-bizdan">
+      <div class="qarz-total"><div><div class="qt-lbl">Jami biz qarzdormiz</div><div class="qt-amt" id="qt-bizdan" style="color:var(--red)">0 so'm</div></div></div>
+      <div id="qlist-bizdan"><div class="empty">Qarz yo'q ✅</div></div>
+    </div>
+    <div id="qarz-bizga" style="display:none">
+      <div class="qarz-total"><div><div class="qt-lbl">Jami bizga qarzdor</div><div class="qt-amt" id="qt-bizga" style="color:var(--green)">0 so'm</div></div></div>
+      <div id="qlist-bizga"><div class="empty">Hech kim qarzdor emas</div></div>
     </div>
 
-    <div class="step-card">
-      <div class="step-card-title"><span class="step-num">4</span>Izoh (nima uchun?)</div>
-      <input class="field-input" type="text" id="h-izoh" placeholder="Masalan: Bozorga bordim">
-    </div>
-
-    <div class="result-card" id="h-result">
-      <div class="result-row"><span>Kassadan olindi</span><span class="rv gold" id="hr-olgan">—</span></div>
-      <div class="result-row"><span>Sarflandi</span><span class="rv neg" id="hr-sarf">—</span></div>
-      <div class="result-row" style="border-top:1px solid rgba(61,214,140,0.2);padding-top:8px;margin-top:4px">
-        <span style="font-weight:700">Qoldiq (qaytadi)</span>
-        <span class="rv pos" id="hr-qoldiq" style="font-size:18px">—</span>
+    <div id="qarz-add" style="display:none">
+      <div class="fgrp"><label class="flbl">Turi</label>
+        <div class="toggle-row" style="margin-bottom:0">
+          <button class="tog-btn exp active" id="qadd-type-btn" onclick="toggleQarzType(this)">🔴 Biz qarzdormiz</button>
+        </div>
       </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="action-btn btn-gold" onclick="hamyonOl()">📤 Pul ol</button>
-      <button class="action-btn btn-green" onclick="hamyonQayt()">📥 Qaytarish</button>
+      <div class="fgrp"><label class="flbl">Ism</label><input class="finput" type="text" id="q-ism" placeholder="Kim bilan?"></div>
+      <div class="fgrp"><label class="flbl">Telefon</label><input class="finput" type="tel" id="q-tel" placeholder="+998 90 000 00 00"></div>
+      <div class="fgrp">
+        <label class="flbl">Summa</label>
+        <div class="curr-toggle">
+          <button class="curr-btn active" onclick="setCurr('uzs',this)">🇺🇿 So'm</button>
+          <button class="curr-btn" onclick="setCurr('usd',this)">🇺🇸 Dollar</button>
+        </div>
+        <input class="finput big" type="number" id="q-summa" placeholder="0" inputmode="numeric">
+      </div>
+      <div class="fgrp"><label class="flbl">Sana (olish/berish)</label><input class="finput" type="date" id="q-sana"></div>
+      <div class="fgrp"><label class="flbl">Qaytarish muddati</label><input class="finput" type="date" id="q-muddat"></div>
+      <div class="fgrp"><label class="flbl">Izoh</label><input class="finput" type="text" id="q-izoh" placeholder="Qo'shimcha ma'lumot"></div>
+      <button class="abtn btn-pur" onclick="addQarz()">✅ Qarz qo'shish</button>
     </div>
   </div>
 </div>
 
 <!-- TARIX -->
 <div id="s-tarix" class="screen">
-  <div class="tarix-screen">
-    <div class="filter-chips">
+  <div class="tscr">
+    <div class="chips" id="filter-chips">
       <button class="chip active" onclick="setFilter('all',this)">Barchasi</button>
       <button class="chip" onclick="setFilter('today',this)">Bugun</button>
       <button class="chip" onclick="setFilter('week',this)">Hafta</button>
       <button class="chip" onclick="setFilter('month',this)">Oy</button>
+      <button class="chip" onclick="setFilter('ruslan',this)">👔 Ruslan</button>
+      <button class="chip" onclick="setFilter('xolida',this)">👜 Xolida</button>
     </div>
     <div class="date-row">
       <input type="date" id="from-date" onchange="renderTarix()">
       <input type="date" id="to-date" onchange="renderTarix()">
       <button onclick="clearDate()">✕</button>
     </div>
-    <div class="tarix-cols">
-      <div>
-        <div class="t-col-hdr inc">📈 Tushum<span class="t-col-total" id="inc-total"></span></div>
-        <div id="inc-list"></div>
-      </div>
-      <div>
-        <div class="t-col-hdr exp">📉 Chiqim<span class="t-col-total" id="exp-total"></span></div>
-        <div id="exp-list"></div>
-      </div>
+    <div class="t-cols">
+      <div><div class="t-hdr inc">📈 Tushum<span class="t-total" id="inc-total"></span></div><div id="inc-list"></div></div>
+      <div><div class="t-hdr exp">📉 Chiqim<span class="t-total" id="exp-total"></span></div><div id="exp-list"></div></div>
     </div>
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
 <nav class="nav">
-  <button class="nav-btn active" onclick="goTo('balans',this)">
-    <span class="icon">📊</span>Balans
-  </button>
-  <button class="nav-btn" onclick="goTo('kirim',this)">
-    <span class="icon">💸</span>Kirim/Chiqim
-  </button>
-  <button class="nav-btn" onclick="goTo('hamyon',this)">
-    <span class="icon">👜</span>Hamyon
-  </button>
-  <button class="nav-btn" onclick="goTo('tarix',this)">
-    <span class="icon">📋</span>Tarix
-  </button>
+  <button class="nav-btn active" onclick="goTo('balans',this)"><span class="ico">📊</span>Balans</button>
+  <button class="nav-btn" onclick="goTo('kirim',this)"><span class="ico">💸</span>Kirim/Chiqim</button>
+  <button class="nav-btn" onclick="goTo('hamyon',this)"><span class="ico">👜</span>Hamyon</button>
+  <button class="nav-btn" onclick="goTo('qarz',this)"><span class="ico">🤝</span>Qarz</button>
+  <button class="nav-btn" onclick="goTo('tarix',this)"><span class="ico">📋</span>Tarix</button>
 </nav>
+</div><!-- end #app -->
 
 <div class="toast" id="toast"></div>
 
 <script>
-const firebaseConfig = {
-  databaseURL: "https://oilamoliyasi-8f864-default-rtdb.asia-southeast1.firebasedatabase.app"
-};
+const firebaseConfig={databaseURL:"https://oilamoliyasi-8f864-default-rtdb.asia-southeast1.firebasedatabase.app"};
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
 
-let balans = { xavfsizlik:0,ehson:0,hordiq:0,rozgor:0,kapital:0,kichik:0,katta:0,hamyon:0 };
-let transactions = [];
-let payD = 'naqt', payX = 'naqt';
-let curFilter = 'all';
-let curMode = 'income';
+let balans={xavfsizlik:0,ehson:0,hordiq:0,rozgor:0,otaona:0,kapital:0,kichik:0,katta:0,'hamyon-ruslan':0,'hamyon-xolida':0};
+let transactions=[],qarzlar=[];
+let payD='naqt',payX='naqt';
+let curFilter='all',curOwner='ruslan',curQarzType='bizdan',curCurr='uzs';
+let qarzTypeAdd='bizdan';
 
-const KASSA = {
-  xavfsizlik:"Xavfsizlik", ehson:"Ehson", hordiq:"Hordiq",
-  rozgor:"Ro'zg'or", kapital:"Kapital", kichik:"Kichik orzu",
-  katta:"Katta orzu", hamyon:"Hamyon"
-};
+const KASSA={xavfsizlik:"Xavfsizlik",ehson:"Ehson",hordiq:"Hordiq",rozgor:"Ro'zg'or",otaona:"Ota-ona",kapital:"Kapital",kichik:"Kichik orzu",katta:"Katta orzu",'hamyon-ruslan':"Ruslan hamyoni",'hamyon-xolida':"Xolida hamyoni"};
 
-// Date header
-const now = new Date();
-document.getElementById('hdr-date').textContent =
-  now.toLocaleDateString('uz-UZ', { weekday:'long', day:'numeric', month:'long' });
+// ===== PIN =====
+let pinInput='',pinSetup='',pinMode='check';
 
-function fmt(n) { return Math.round(n).toLocaleString('uz-UZ') + " so'm"; }
-function fmtShort(n) {
-  n = Math.round(n);
-  if (n >= 1000000) return (n/1000000).toFixed(1).replace(/\.0$/,'') + ' mln';
-  if (n >= 1000) return (n/1000).toFixed(0) + ' ming';
-  return n.toString();
+function initPin(){
+  db.ref('/pin').once('value',snap=>{
+    if(!snap.val()){
+      pinMode='setup';
+      document.getElementById('pin-sub').textContent='Yangi PIN kod o\'rnatish';
+      document.getElementById('pin-hint').textContent='4 ta raqam kiriting — bu sizning shaxsiy kodingiz';
+    } else {
+      pinMode='check';
+      document.getElementById('pin-sub').textContent='PIN kodingizni kiriting';
+    }
+  });
 }
 
-// Firebase
-db.ref('/').on('value', snap => {
-  const d = snap.val() || {};
-  balans = d.balans || { xavfsizlik:0,ehson:0,hordiq:0,rozgor:0,kapital:0,kichik:0,katta:0,hamyon:0 };
-  transactions = d.transactions ? Object.values(d.transactions) : [];
-  renderBalans();
-  if (document.getElementById('s-tarix').classList.contains('active')) renderTarix();
-});
-
-function renderBalans() {
-  const b = balans;
-  const total = (b.xavfsizlik||0)+(b.ehson||0)+(b.hordiq||0)+(b.rozgor||0)+(b.kapital||0)+(b.kichik||0)+(b.katta||0);
-  document.getElementById('b-total').textContent = fmt(total);
-  document.getElementById('b-hamyon').textContent = fmt(b.hamyon||0);
-  document.getElementById('b-xavfsizlik').textContent = fmt(b.xavfsizlik||0);
-  document.getElementById('b-ehson').textContent = fmt(b.ehson||0);
-  document.getElementById('b-hordiq').textContent = fmt(b.hordiq||0);
-  document.getElementById('b-rozgor').textContent = fmt(b.rozgor||0);
-  document.getElementById('b-kapital').textContent = fmt(b.kapital||0);
-  document.getElementById('b-kichik').textContent = fmt(b.kichik||0);
-  document.getElementById('b-katta').textContent = fmt(b.katta||0);
-  const hEl = document.getElementById('h-balans-big');
-  if (hEl) hEl.textContent = fmt(b.hamyon||0);
+function pinPress(d){
+  if(pinInput.length>=4) return;
+  pinInput+=d;
+  updateDots();
+  if(pinInput.length===4) setTimeout(checkPin,150);
+}
+function pinDel(){pinInput=pinInput.slice(0,-1);updateDots();}
+function updateDots(){
+  for(let i=0;i<4;i++){
+    const el=document.getElementById('pd'+i);
+    el.classList.toggle('filled',i<pinInput.length);
+    el.classList.remove('error');
+  }
+}
+function checkPin(){
+  if(pinMode==='setup'){
+    if(!pinSetup){
+      pinSetup=pinInput; pinInput='';
+      document.getElementById('pin-sub').textContent='PIN kodni tasdiqlang';
+      document.getElementById('pin-hint').textContent='Yana bir marta kiriting';
+      updateDots(); return;
+    }
+    if(pinSetup===pinInput){
+      db.ref('/pin').set(btoa(pinInput));
+      openApp();
+    } else {
+      pinError('PIN mos kelmadi, qaytadan');
+      pinSetup=''; pinInput='';
+    }
+    return;
+  }
+  db.ref('/pin').once('value',snap=>{
+    if(snap.val()===btoa(pinInput)) openApp();
+    else pinError('PIN kod noto\'g\'ri!');
+  });
+}
+function pinError(msg){
+  for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.add('error');
+  document.getElementById('pin-hint').textContent=msg;
+  document.getElementById('pin-hint').style.color='var(--red)';
+  setTimeout(()=>{pinInput='';updateDots();document.getElementById('pin-hint').style.color='var(--gold)';},900);
+}
+function openApp(){
+  document.getElementById('pin-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  loadData();
+}
+function lockApp(){
+  document.getElementById('pin-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  pinInput=''; pinSetup='';
+  document.getElementById('pin-sub').textContent='PIN kodingizni kiriting';
+  document.getElementById('pin-hint').textContent='';
+  updateDots();
+  pinMode='check';
 }
 
-// NAV
-function goTo(id, btn) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+// ===== DATA =====
+function loadData(){
+  document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('uz-UZ',{weekday:'long',day:'numeric',month:'long'});
+  db.ref('/').on('value',snap=>{
+    const d=snap.val()||{};
+    balans=Object.assign({xavfsizlik:0,ehson:0,hordiq:0,rozgor:0,otaona:0,kapital:0,kichik:0,katta:0,'hamyon-ruslan':0,'hamyon-xolida':0},d.balans||{});
+    transactions=d.transactions?Object.values(d.transactions):[];
+    qarzlar=d.qarzlar?Object.values(d.qarzlar).map((q,i)=>({...q,_key:Object.keys(d.qarzlar)[i]})):[];
+    renderBalans();renderQarzMini();
+    if(document.getElementById('s-tarix').classList.contains('active')) renderTarix();
+    if(document.getElementById('s-qarz').classList.contains('active')) renderQarzlar();
+  });
+}
+
+function fmt(n){return Math.round(n).toLocaleString('uz-UZ')+" so'm";}
+function fmtUsd(n){return '$'+parseFloat(n).toFixed(2);}
+
+function renderBalans(){
+  const b=balans;
+  const total=(b.xavfsizlik||0)+(b.ehson||0)+(b.hordiq||0)+(b.rozgor||0)+(b.otaona||0)+(b.kapital||0)+(b.kichik||0)+(b.katta||0);
+  document.getElementById('b-total').textContent=fmt(total);
+  document.getElementById('b-hruslan').textContent=fmt(b['hamyon-ruslan']||0);
+  document.getElementById('b-hxolida').textContent=fmt(b['hamyon-xolida']||0);
+  document.getElementById('b-xavfsizlik').textContent=fmt(b.xavfsizlik||0);
+  document.getElementById('b-ehson').textContent=fmt(b.ehson||0);
+  document.getElementById('b-hordiq').textContent=fmt(b.hordiq||0);
+  document.getElementById('b-rozgor').textContent=fmt(b.rozgor||0);
+  document.getElementById('b-otaona').textContent=fmt(b.otaona||0);
+  document.getElementById('b-kapital').textContent=fmt(b.kapital||0);
+  document.getElementById('b-kichik').textContent=fmt(b.kichik||0);
+  document.getElementById('b-katta').textContent=fmt(b.katta||0);
+  document.getElementById('hb-ruslan').textContent=fmt(b['hamyon-ruslan']||0);
+  document.getElementById('hb-xolida').textContent=fmt(b['hamyon-xolida']||0);
+  calcHamyon();
+}
+
+function renderQarzMini(){
+  const bizdan=qarzlar.filter(q=>q.tur==='bizdan'&&!q.tolanди);
+  const bizga=qarzlar.filter(q=>q.tur==='bizga'&&!q.tolandi);
+  const sumBizdan=bizdan.reduce((s,q)=>s+(q.curr==='usd'?q.summa*12500:q.summa),0);
+  const sumBizga=bizga.reduce((s,q)=>s+(q.curr==='usd'?q.summa*12500:q.summa),0);
+  document.getElementById('qm-bizdan').textContent=fmt(sumBizdan);
+  document.getElementById('qm-bizga').textContent=fmt(sumBizga);
+  document.getElementById('qm-bizdan-cnt').textContent=bizdan.length+' ta qarz';
+  document.getElementById('qm-bizga-cnt').textContent=bizga.length+' ta odam';
+}
+
+function showKbal(selId,hintId){
+  const v=document.getElementById(selId).value;
+  const h=document.getElementById(hintId);
+  if(!v){h.classList.remove('show');return;}
+  const b=balans[v]||0;
+  h.textContent='Mavjud: '+fmt(b);
+  h.classList.add('show');
+}
+
+function goTo(id,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('s-'+id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'tarix') renderTarix();
+  if(id==='tarix') renderTarix();
+  if(id==='qarz') renderQarzlar();
 }
 
-// MODE SWITCH
-function switchMode(m, btn) {
-  curMode = m;
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+function goToQarz(tur){
+  goTo('qarz',document.querySelectorAll('.nav-btn')[3]);
+  switchQarz(tur,null);
+}
+
+function switchMode(m,btn){
+  document.querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('mode-income').style.display = m==='income' ? '' : 'none';
-  document.getElementById('mode-expense').style.display = m==='expense' ? '' : 'none';
+  document.getElementById('mode-income').style.display=m==='income'?'':'none';
+  document.getElementById('mode-expense').style.display=m==='expense'?'':'none';
+  if(m==='expense') showKbal('x-hisob','xkbal');
 }
 
-// PAY TYPE
-function setPay(prefix, type, btn) {
-  if (prefix==='d') payD=type; else payX=type;
-  const parent = btn.closest('.pay-btns');
-  parent.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+function setPay(p,t,btn){
+  if(p==='d') payD=t; else payX=t;
+  btn.closest('.pay-row').querySelectorAll('.pbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
 
-// TOAST
-function toast(msg, err) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (err ? ' err' : '');
-  setTimeout(() => t.className='toast', 2800);
+function setOwner(o,btn){
+  curOwner=o;
+  document.querySelectorAll('.owner-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  calcHamyon();
 }
 
-// PREVIEW
-function previewTaq() {
-  const s = parseFloat(document.getElementById('d-summa').value)||0;
-  const p = document.getElementById('taq-preview');
-  if (!s) { p.classList.remove('show'); return; }
+function toast(msg,err){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(err?' err':'');
+  setTimeout(()=>t.className='toast',2800);
+}
+
+function previewTaq(){
+  const s=parseFloat(document.getElementById('d-summa').value)||0;
+  const p=document.getElementById('taq-preview');
+  if(!s){p.classList.remove('show');return;}
   p.classList.add('show');
-  document.getElementById('p-x').textContent = fmt(s*0.10);
-  document.getElementById('p-e').textContent = fmt(s*0.05);
-  document.getElementById('p-h').textContent = fmt(s*0.05);
-  document.getElementById('p-r').textContent = fmt(s*0.40);
-  document.getElementById('p-k').textContent = fmt(s*0.32);
-  document.getElementById('p-ki').textContent = fmt(s*0.04);
-  document.getElementById('p-ka').textContent = fmt(s*0.04);
+  document.getElementById('p-x').textContent=fmt(s*0.10);
+  document.getElementById('p-e').textContent=fmt(s*0.05);
+  document.getElementById('p-h').textContent=fmt(s*0.05);
+  document.getElementById('p-r').textContent=fmt(s*0.35);
+  document.getElementById('p-oo').textContent=fmt(s*0.05);
+  document.getElementById('p-k').textContent=fmt(s*0.28);
+  document.getElementById('p-ki').textContent=fmt(s*0.04);
+  document.getElementById('p-ka').textContent=fmt(s*0.04);
 }
 
-// DAROMAD
-function addDaromad() {
-  const s = parseFloat(document.getElementById('d-summa').value);
-  if (!s||s<=0) { toast('Summa kiriting!',true); return; }
-  const izoh = document.getElementById('d-izoh').value || 'Daromad';
-  const nb = {...balans};
+function addDaromad(){
+  const s=parseFloat(document.getElementById('d-summa').value);
+  if(!s||s<=0){toast('Summa kiriting!',true);return;}
+  const izoh=document.getElementById('d-izoh').value||'Daromad';
+  const nb={...balans};
   nb.xavfsizlik=(nb.xavfsizlik||0)+s*0.10;
   nb.ehson=(nb.ehson||0)+s*0.05;
   nb.hordiq=(nb.hordiq||0)+s*0.05;
-  nb.rozgor=(nb.rozgor||0)+s*0.40;
-  nb.kapital=(nb.kapital||0)+s*0.32;
+  nb.rozgor=(nb.rozgor||0)+s*0.35;
+  nb.otaona=(nb.otaona||0)+s*0.05;
+  nb.kapital=(nb.kapital||0)+s*0.28;
   nb.kichik=(nb.kichik||0)+s*0.04;
   nb.katta=(nb.katta||0)+s*0.04;
   db.ref('/balans').set(nb);
-  db.ref('/transactions').push({ type:'daromad',summa:s,izoh,payType:payD,timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ') });
-  document.getElementById('d-summa').value='';
-  document.getElementById('d-izoh').value='';
+  db.ref('/transactions').push({type:'daromad',summa:s,izoh,payType:payD,timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ')});
+  document.getElementById('d-summa').value='';document.getElementById('d-izoh').value='';
   document.getElementById('taq-preview').classList.remove('show');
-  toast('✅ Daromad qo\'shildi: '+fmt(s));
+  toast('✅ Daromad: '+fmt(s));
 }
 
-// XARAJAT
-function addXarajat() {
-  const hisob = document.getElementById('x-hisob').value;
-  const s = parseFloat(document.getElementById('x-summa').value);
-  const izoh = document.getElementById('x-izoh').value || 'Xarajat';
-  if (!s||s<=0) { toast('Summa kiriting!',true); return; }
-  const mavjud = balans[hisob]||0;
-  if (mavjud < s) { toast('Yetarli mablag\' yo\'q! Mavjud: '+fmt(mavjud),true); return; }
-  const nb = {...balans};
-  nb[hisob] = mavjud - s;
+function addXarajat(){
+  const hisob=document.getElementById('x-hisob').value;
+  const s=parseFloat(document.getElementById('x-summa').value);
+  const izoh=document.getElementById('x-izoh').value||'Xarajat';
+  if(!s||s<=0){toast('Summa kiriting!',true);return;}
+  const mavjud=balans[hisob]||0;
+  if(mavjud<s){toast('Yetarli mablag\' yo\'q! Mavjud: '+fmt(mavjud),true);return;}
+  const nb={...balans};nb[hisob]=mavjud-s;
+  const isH=hisob.startsWith('hamyon-');
+  const owner=isH?hisob.split('-')[1]:null;
   db.ref('/balans').set(nb);
-  db.ref('/transactions').push({ type:'xarajat',hisob,summa:s,izoh,payType:payX,timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ') });
-  document.getElementById('x-summa').value='';
-  document.getElementById('x-izoh').value='';
-  toast('✅ Xarajat kiritildi: '+fmt(s));
+  db.ref('/transactions').push({type:'xarajat',hisob,summa:s,izoh,payType:payX,owner,timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ')});
+  document.getElementById('x-summa').value='';document.getElementById('x-izoh').value='';
+  toast('✅ Xarajat: '+fmt(s));
 }
 
-// HAMYON
-function calcHamyon() {
-  const olgan = parseFloat(document.getElementById('h-olgan').value)||0;
-  const sarf = parseFloat(document.getElementById('h-sarf').value)||0;
-  const kassa = document.getElementById('h-kassa').value;
-  const rc = document.getElementById('h-result');
-  if (!kassa||!olgan) { rc.classList.remove('show'); return; }
+function calcHamyon(){
+  const sarf=parseFloat(document.getElementById('h-sarf').value)||0;
+  const hKey='hamyon-'+curOwner;
+  const hBal=balans[hKey]||0;
+  const rc=document.getElementById('h-result');
+  if(!sarf){rc.classList.remove('show');return;}
   rc.classList.add('show');
-  document.getElementById('hr-olgan').textContent = fmt(olgan);
-  document.getElementById('hr-sarf').textContent = fmt(sarf);
-  document.getElementById('hr-qoldiq').textContent = fmt(Math.max(0,olgan-sarf));
+  document.getElementById('hr-bal').textContent=fmt(hBal);
+  document.getElementById('hr-sarf').textContent=fmt(sarf);
+  document.getElementById('hr-qoldiq').textContent=fmt(Math.max(0,hBal-sarf));
 }
 
-function hamyonOl() {
-  const kassa = document.getElementById('h-kassa').value;
-  const olgan = parseFloat(document.getElementById('h-olgan').value)||0;
-  if (!kassa) { toast('Kassani tanlang!',true); return; }
-  if (!olgan||olgan<=0) { toast('Summa kiriting!',true); return; }
-  const mavjud = balans[kassa]||0;
-  if (mavjud<olgan) { toast('Yetarli mablag\' yo\'q! Mavjud: '+fmt(mavjud),true); return; }
-  const nb = {...balans};
-  nb[kassa] = mavjud - olgan;
-  nb.hamyon = (nb.hamyon||0) + olgan;
+function hamyonOl(){
+  const kassa=document.getElementById('h-kassa').value;
+  const olgan=parseFloat(document.getElementById('h-olgan').value)||0;
+  if(!kassa){toast('Kassani tanlang!',true);return;}
+  if(!olgan||olgan<=0){toast('Summa kiriting!',true);return;}
+  const mavjud=balans[kassa]||0;
+  if(mavjud<olgan){toast('Yetarli mablag\' yo\'q! Mavjud: '+fmt(mavjud),true);return;}
+  const hKey='hamyon-'+curOwner;
+  const nb={...balans};nb[kassa]=mavjud-olgan;nb[hKey]=(nb[hKey]||0)+olgan;
   db.ref('/balans').set(nb);
-  db.ref('/transactions').push({ type:'hamyon-ol',hisob:kassa,summa:olgan,izoh:'Kassadan hamyonga olindi ('+KASSA[kassa]+')',timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ') });
-  toast('👜 Hamyonga '+fmt(olgan)+' olindi');
-}
-
-function hamyonQayt() {
-  const kassa = document.getElementById('h-kassa').value;
-  const olgan = parseFloat(document.getElementById('h-olgan').value)||0;
-  const sarf = parseFloat(document.getElementById('h-sarf').value)||0;
-  const izoh = document.getElementById('h-izoh').value || 'Hamyondan sarflandi';
-  if (!kassa) { toast('Kassani tanlang!',true); return; }
-  const qoldiq = olgan - sarf;
-  if (qoldiq <= 0 && sarf <= 0) { toast('Ma\'lumot kiriting!',true); return; }
-  const hMavjud = balans.hamyon||0;
-  if (hMavjud < qoldiq) { toast('Hamyonda yetarli pul yo\'q!',true); return; }
-  const nb = {...balans};
-  const txs = [];
-  if (sarf > 0) {
-    txs.push({ type:'xarajat',hisob:'hamyon',summa:sarf,izoh,payType:'naqt',timestamp:Date.now()-1,date:new Date().toLocaleDateString('uz-UZ') });
-  }
-  if (qoldiq > 0) {
-    nb.hamyon = hMavjud - qoldiq;
-    nb[kassa] = (nb[kassa]||0) + qoldiq;
-    txs.push({ type:'hamyon-qayt',hisob:kassa,summa:qoldiq,izoh:'Qoldiq '+KASSA[kassa]+' kassasiga qaytarildi',timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ') });
-  }
-  db.ref('/balans').set(nb);
-  txs.forEach(tx => db.ref('/transactions').push(tx));
+  const nm=curOwner.charAt(0).toUpperCase()+curOwner.slice(1);
+  db.ref('/transactions').push({type:'hamyon-ol',hisob:kassa,owner:curOwner,summa:olgan,izoh:nm+' — '+KASSA[kassa]+' kassasidan hamyonga oldi',timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ')});
   document.getElementById('h-olgan').value='';
-  document.getElementById('h-sarf').value='';
-  document.getElementById('h-izoh').value='';
+  document.getElementById('h-kassa').value='';
+  document.getElementById('hkbal').classList.remove('show');
+  toast('✅ '+fmt(olgan)+' '+nm+' hamyoniga olindi');
+}
+
+function hamyonSarf(){
+  const sarf=parseFloat(document.getElementById('h-sarf').value)||0;
+  const izoh=document.getElementById('h-izoh').value||'Hamyondan sarflandi';
+  const qaytKassa=document.getElementById('h-qayt').value;
+  const hKey='hamyon-'+curOwner;
+  const hBal=balans[hKey]||0;
+  const nm=curOwner.charAt(0).toUpperCase()+curOwner.slice(1);
+  if(!sarf||sarf<=0){toast('Sarflangan summani kiriting!',true);return;}
+  if(hBal<sarf){toast('Hamyonda yetarli pul yo\'q! Mavjud: '+fmt(hBal),true);return;}
+  const qoldiq=hBal-sarf;
+  const nb={...balans};
+  nb[hKey]=hBal-sarf;
+  db.ref('/transactions').push({type:'xarajat',hisob:hKey,owner:curOwner,summa:sarf,izoh:izoh+' ('+nm+' hamyonidan)',payType:'naqt',timestamp:Date.now()-1,date:new Date().toLocaleDateString('uz-UZ')});
+  if(qaytKassa&&qoldiq>0){
+    nb[hKey]=0;nb[qaytKassa]=(nb[qaytKassa]||0)+qoldiq;
+    db.ref('/transactions').push({type:'hamyon-qayt',hisob:qaytKassa,owner:curOwner,summa:qoldiq,izoh:'Qoldiq '+KASSA[qaytKassa]+' kassasiga qaytarildi',timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ')});
+  }
+  db.ref('/balans').set(nb);
+  document.getElementById('h-sarf').value='';document.getElementById('h-izoh').value='';
   document.getElementById('h-result').classList.remove('show');
-  if (sarf>0) toast('✅ Sarflandi: '+fmt(sarf)+(qoldiq>0?' | Qaytdi: '+fmt(qoldiq):''));
-  else toast('✅ '+fmt(qoldiq)+' '+KASSA[kassa]+' kassasiga qaytarildi');
+  let msg='✅ Sarflandi: '+fmt(sarf);
+  if(qaytKassa&&qoldiq>0) msg+=' | Qaytdi: '+fmt(qoldiq);
+  toast(msg);
 }
 
-// TARIX
-function setFilter(f, btn) {
-  curFilter = f;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+// ===== QARZ =====
+function switchQarz(tur,btn){
+  curQarzType=tur;
+  document.querySelectorAll('.qarz-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else document.querySelectorAll('.qarz-tab').forEach(b=>{if(b.textContent.includes(tur==='bizdan'?'Biz':tur==='bizga'?'Bizga':'Qo\'sh')) b.classList.add('active');});
+  ['qarz-bizdan','qarz-bizga','qarz-add'].forEach(id=>document.getElementById(id).style.display='none');
+  if(tur==='bizdan') document.getElementById('qarz-bizdan').style.display='';
+  else if(tur==='bizga') document.getElementById('qarz-bizga').style.display='';
+  else document.getElementById('qarz-add').style.display='';
+  renderQarzlar();
+}
+
+function toggleQarzType(btn){
+  qarzTypeAdd=qarzTypeAdd==='bizdan'?'bizga':'bizdan';
+  btn.textContent=qarzTypeAdd==='bizdan'?'🔴 Biz qarzdormiz':'🟢 Bizga qarzdor';
+  btn.className='tog-btn '+(qarzTypeAdd==='bizdan'?'exp':'inc')+' active';
+}
+
+function setCurr(c,btn){
+  curCurr=c;
+  document.querySelectorAll('.curr-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('from-date').value='';
-  document.getElementById('to-date').value='';
-  renderTarix();
-}
-function clearDate() {
-  document.getElementById('from-date').value='';
-  document.getElementById('to-date').value='';
-  renderTarix();
 }
 
-function renderTarix() {
-  const fromD = document.getElementById('from-date').value;
-  const toD = document.getElementById('to-date').value;
-  const n = new Date();
-  let txs = [...transactions].sort((a,b)=>b.timestamp-a.timestamp).filter(tx=>{
-    const d = new Date(tx.timestamp);
-    if (fromD && d<new Date(fromD)) return false;
-    if (toD && d>new Date(toD+'T23:59:59')) return false;
-    if (!fromD && !toD) {
-      if (curFilter==='today') return d.toDateString()===n.toDateString();
-      if (curFilter==='week') { const w=new Date(n); w.setDate(n.getDate()-7); return d>=w; }
-      if (curFilter==='month') return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();
-    }
-    return true;
-  });
+function addQarz(){
+  const ism=document.getElementById('q-ism').value.trim();
+  const tel=document.getElementById('q-tel').value.trim();
+  const summa=parseFloat(document.getElementById('q-summa').value);
+  const sana=document.getElementById('q-sana').value;
+  const muddat=document.getElementById('q-muddat').value;
+  const izoh=document.getElementById('q-izoh').value;
+  if(!ism){toast('Ism kiriting!',true);return;}
+  if(!summa||summa<=0){toast('Summa kiriting!',true);return;}
+  db.ref('/qarzlar').push({tur:qarzTypeAdd,ism,tel,summa,curr:curCurr,sana,muddat,izoh,tolandi:false,timestamp:Date.now()});
+  document.getElementById('q-ism').value='';document.getElementById('q-tel').value='';
+  document.getElementById('q-summa').value='';document.getElementById('q-sana').value='';
+  document.getElementById('q-muddat').value='';document.getElementById('q-izoh').value='';
+  toast('✅ Qarz qo\'shildi');
+  switchQarz(qarzTypeAdd,null);
+}
 
-  const income = txs.filter(t=>t.type==='daromad');
-  const expense = txs.filter(t=>t.type!=='daromad');
-  document.getElementById('inc-total').textContent = fmt(income.reduce((s,t)=>s+t.summa,0));
-  document.getElementById('exp-total').textContent = fmt(expense.reduce((s,t)=>s+t.summa,0));
+function renderQarzlar(){
+  const bizdan=qarzlar.filter(q=>q.tur==='bizdan'&&!q.tolandi);
+  const bizga=qarzlar.filter(q=>q.tur==='bizga'&&!q.tolandi);
+  const sumBizdan=bizdan.reduce((s,q)=>s+(q.curr==='usd'?q.summa*12500:q.summa),0);
+  const sumBizga=bizga.reduce((s,q)=>s+(q.curr==='usd'?q.summa*12500:q.summa),0);
+  document.getElementById('qt-bizdan').textContent=fmt(sumBizdan);
+  document.getElementById('qt-bizga').textContent=fmt(sumBizga);
 
-  function mkList(list, isIncome) {
-    if (!list.length) return '<div class="empty">Ma\'lumot yo\'q</div>';
-    return list.map(tx=>{
-      const d = new Date(tx.timestamp);
-      const hmy = tx.type==='hamyon-ol'||tx.type==='hamyon-qayt';
-      const cls = hmy ? 'hmy' : isIncome ? 'inc' : 'exp';
-      const sign = isIncome ? '+' : '-';
-      return `<div class="tx-card ${cls}">
-        <div class="tx-sum ${cls}">${sign}${fmt(tx.summa)}</div>
-        <div class="tx-desc">${tx.izoh||''}</div>
-        <div class="tx-meta">${d.toLocaleDateString('uz-UZ')} ${d.toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'})}</div>
-        ${tx.hisob?`<span class="tx-tag">${KASSA[tx.hisob]||tx.hisob}</span>`:''}
-        ${tx.payType?`<span class="tx-tag">${tx.payType==='naqt'?'💵':'💳'} ${tx.payType}</span>`:''}
+  function mkQList(list,tur){
+    if(!list.length) return '<div class="empty">'+(tur==='bizdan'?'Qarz yo\'q ✅':'Hech kim qarzdor emas')+'</div>';
+    return list.map(q=>{
+      const amtStr=q.curr==='usd'?fmtUsd(q.summa)+' (~'+fmt(q.summa*12500)+')':fmt(q.summa);
+      const today=new Date().toISOString().split('T')[0];
+      const overdue=q.muddat&&q.muddat<today;
+      return `<div class="qarz-item ${tur}">
+        <div class="qi-name">${q.ism} ${q.tel?'<span style="font-size:11px;color:var(--text3)">📞 '+q.tel+'</span>':''}</div>
+        <div class="qi-amt ${tur}">${amtStr}</div>
+        <div class="qi-meta">
+          ${q.sana?'📅 Sana: '+q.sana+'  ':' '}
+          ${q.muddat?'⏰ Muddat: <span style="color:'+(overdue?'var(--red)':'var(--text3)')+'">'+q.muddat+'</span>':''}
+        </div>
+        ${q.izoh?'<div class="qi-meta" style="margin-top:3px">💬 '+q.izoh+'</div>':''}
+        <div class="qi-actions">
+          <button class="qi-btn pay" onclick="tolandiQarz('${q._key}')">✅ To'landi</button>
+          <button class="qi-btn del" onclick="delQarz('${q._key}')">🗑️ O'chirish</button>
+        </div>
       </div>`;
     }).join('');
   }
-  document.getElementById('inc-list').innerHTML = mkList(income, true);
-  document.getElementById('exp-list').innerHTML = mkList(expense, false);
+  document.getElementById('qlist-bizdan').innerHTML=mkQList(bizdan,'bizdan');
+  document.getElementById('qlist-bizga').innerHTML=mkQList(bizga,'bizga');
 }
+
+function tolandiQarz(key){
+  db.ref('/qarzlar/'+key+'/tolandi').set(true);
+  toast('✅ Qarz to\'landi deb belgilandi');
+}
+function delQarz(key){
+  db.ref('/qarzlar/'+key).remove();
+  toast('🗑️ Qarz o\'chirildi');
+}
+
+// ===== TARIX =====
+function setFilter(f,btn){
+  curFilter=f;
+  document.querySelectorAll('#filter-chips .chip').forEach(c=>{c.classList.remove('active','ruslan-a','xolida-a');});
+  btn.classList.add('active');
+  if(f==='ruslan') btn.classList.add('ruslan-a');
+  if(f==='xolida') btn.classList.add('xolida-a');
+  document.getElementById('from-date').value='';document.getElementById('to-date').value='';
+  renderTarix();
+}
+function clearDate(){document.getElementById('from-date').value='';document.getElementById('to-date').value='';renderTarix();}
+
+function renderTarix(){
+  const fromD=document.getElementById('from-date').value;
+  const toD=document.getElementById('to-date').value;
+  const n=new Date();
+  let txs=[...transactions].sort((a,b)=>b.timestamp-a.timestamp).filter(tx=>{
+    const d=new Date(tx.timestamp);
+    if(fromD&&d<new Date(fromD)) return false;
+    if(toD&&d>new Date(toD+'T23:59:59')) return false;
+    if(curFilter==='ruslan'&&tx.owner!=='ruslan') return false;
+    if(curFilter==='xolida'&&tx.owner!=='xolida') return false;
+    if(!fromD&&!toD){
+      if(curFilter==='today') return d.toDateString()===n.toDateString();
+      if(curFilter==='week'){const w=new Date(n);w.setDate(n.getDate()-7);return d>=w;}
+      if(curFilter==='month') return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();
+    }
+    return true;
+  });
+  const income=txs.filter(t=>t.type==='daromad');
+  const expense=txs.filter(t=>t.type!=='daromad');
+  document.getElementById('inc-total').textContent=fmt(income.reduce((s,t)=>s+t.summa,0));
+  document.getElementById('exp-total').textContent=fmt(expense.reduce((s,t)=>s+t.summa,0));
+
+  function mkTx(list,isInc){
+    if(!list.length) return '<div class="empty">Ma\'lumot yo\'q</div>';
+    return list.map(tx=>{
+      const d=new Date(tx.timestamp);
+      let cls='exp',scls='exp';
+      if(isInc){cls='inc';scls='inc';}
+      else if(tx.hisob==='hamyon-ruslan'||tx.owner==='ruslan'){cls='hr';scls='hr';}
+      else if(tx.hisob==='hamyon-xolida'||tx.owner==='xolida'){cls='hx';scls='hx';}
+      const ownerTag=tx.owner?`<span class="tag">${tx.owner==='ruslan'?'👔':'👜'} ${tx.owner==='ruslan'?'Ruslan':'Xolida'}</span>`:'';
+      return `<div class="tx ${cls}">
+        <div class="tx-s ${scls}">${isInc?'+':'-'}${fmt(tx.summa)}</div>
+        <div class="tx-d">${tx.izoh||''}</div>
+        <div class="tx-m">${d.toLocaleDateString('uz-UZ')} ${d.toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'})}</div>
+        ${tx.hisob?`<span class="tag">${KASSA[tx.hisob]||tx.hisob}</span>`:''}
+        ${tx.payType?`<span class="tag">${tx.payType==='naqt'?'💵':'💳'} ${tx.payType}</span>`:''}
+        ${ownerTag}
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('inc-list').innerHTML=mkTx(income,true);
+  document.getElementById('exp-list').innerHTML=mkTx(expense,false);
+}
+
+// Start
+initPin();
 </script>
 </body>
 </html>
