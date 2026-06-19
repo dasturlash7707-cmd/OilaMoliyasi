@@ -279,7 +279,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:
     <div class="k-card"><div class="k-ico">👴</div><div class="k-lbl">Ota-ona</div><div class="k-amt" id="b-otaona">0</div><div class="k-pct">5%</div></div>
     <div class="k-card"><div class="k-ico">📈</div><div class="k-lbl">Kapital</div><div class="k-amt" id="b-kapital">0</div><div class="k-pct">28%</div></div>
     <div class="k-card"><div class="k-ico">⭐</div><div class="k-lbl">Kichik orzu</div><div class="k-amt" id="b-kichik">0</div><div class="k-pct">4%</div></div>
-    <div class="k-card" style="grid-column:1/-1"><div class="k-ico">🌟</div><div class="k-lbl">Katta orzu</div><div class="k-amt" id="b-katta">0</div><div class="k-pct">4%</div></div>
+    <div class="k-card"><div class="k-ico">🌟</div><div class="k-lbl">Katta orzu</div><div class="k-amt" id="b-katta">0</div><div class="k-pct">4%</div></div>
   </div>
 </div>
 
@@ -345,67 +345,102 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:
 <!-- HAMYON -->
 <div id="s-hamyon" class="screen">
   <div class="hscr">
+    <!-- Ikki hamyon balansi -->
     <div class="hamyon-pair" style="margin:0 0 14px">
       <div class="h-card ruslan" style="text-align:center"><div class="h-ico">👔</div><div class="h-name">Ruslan</div><div class="h-amt" id="hb-ruslan">0 so'm</div></div>
       <div class="h-card xolida" style="text-align:center"><div class="h-ico">👜</div><div class="h-name">Xolida</div><div class="h-amt" id="hb-xolida">0 so'm</div></div>
     </div>
-    <div class="owner-tabs">
-      <button class="owner-btn ruslan active" onclick="setOwner('ruslan',this)">👔 Ruslan</button>
-      <button class="owner-btn xolida" onclick="setOwner('xolida',this)">👜 Xolida</button>
+
+    <!-- 2 ta tab: Olish/Qaytarish | Sarflash -->
+    <div class="toggle-row" style="margin-bottom:14px">
+      <button class="tog-btn active" id="htab-ol-btn" onclick="switchHamyonTab('ol',this)" style="color:var(--blue-h)">📤 Olish / Qaytarish</button>
+      <button class="tog-btn" id="htab-sarf-btn" onclick="switchHamyonTab('sarf',this)">💸 Sarflash</button>
     </div>
 
-    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">📤 Kassadan pul olish</div>
-    <div class="step-blk">
-      <div class="step-ttl"><span class="snum">1</span>Qaysi kassadan?</div>
-      <select class="fselect" id="h-kassa" onchange="showKbal('h-kassa','hkbal')">
-        <option value="">— Kassani tanlang —</option>
-        <option value="xavfsizlik">🛡️ Xavfsizlik</option>
-        <option value="ehson">🤲 Ehson</option>
-        <option value="hordiq">🌴 Hordiq</option>
-        <option value="rozgor">🏠 Ro'zg'or</option>
-        <option value="otaona">👴 Ota-ona</option>
-        <option value="kapital">📈 Kapital</option>
-        <option value="kichik">⭐ Kichik orzu</option>
-        <option value="katta">🌟 Katta orzu</option>
-      </select>
-      <div class="kbal-hint" id="hkbal"></div>
-    </div>
-    <div class="step-blk">
-      <div class="step-ttl"><span class="snum">2</span>Qancha olasiz?</div>
-      <input class="finput big" type="number" id="h-olgan" placeholder="0" inputmode="numeric">
-    </div>
-    <button class="abtn btn-b" style="margin-bottom:14px" onclick="hamyonOl()">📤 Hamyonga pul olish</button>
+    <!-- TAB 1: OLISH / QAYTARISH -->
+    <div id="htab-ol">
+      <div class="owner-tabs">
+        <button class="owner-btn ruslan active" onclick="setOwner('ruslan',this)">👔 Ruslan hamyoni</button>
+        <button class="owner-btn xolida" onclick="setOwner('xolida',this)">👜 Xolida hamyoni</button>
+      </div>
+      <div class="step-blk">
+        <div class="step-ttl"><span class="snum">1</span>Qaysi kassadan pul olasiz?</div>
+        <select class="fselect" id="h-kassa" onchange="showKbal('h-kassa','hkbal')">
+          <option value="">— Kassani tanlang —</option>
+          <option value="xavfsizlik">🛡️ Xavfsizlik</option>
+          <option value="ehson">🤲 Ehson</option>
+          <option value="hordiq">🌴 Hordiq</option>
+          <option value="rozgor">🏠 Ro'zg'or</option>
+          <option value="otaona">👴 Ota-ona</option>
+          <option value="kapital">📈 Kapital</option>
+          <option value="kichik">⭐ Kichik orzu</option>
+          <option value="katta">🌟 Katta orzu</option>
+        </select>
+        <div class="kbal-hint" id="hkbal"></div>
+      </div>
+      <div class="step-blk">
+        <div class="step-ttl"><span class="snum">2</span>Qancha olasiz?</div>
+        <input class="finput big" type="number" id="h-olgan" placeholder="0" inputmode="numeric">
+      </div>
+      <button class="abtn btn-b" onclick="hamyonOl()">📤 Hamyonga pul olish</button>
 
-    <div class="divider"></div>
-    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">💸 Hamyondan sarflash</div>
-    <div class="step-blk">
-      <div class="step-ttl"><span class="snum">1</span>Qancha sarflaysiz?</div>
-      <input class="finput big" type="number" id="h-sarf" placeholder="0" inputmode="numeric" oninput="calcHamyon()">
+      <div class="divider"></div>
+
+      <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">↩️ Qoldiqni kassaga qaytarish</div>
+      <div class="step-blk">
+        <div class="step-ttl"><span class="snum">1</span>Qancha qaytarmoqchisiz?</div>
+        <input class="finput big" type="number" id="h-qayt-summa" placeholder="0" inputmode="numeric">
+      </div>
+      <div class="step-blk">
+        <div class="step-ttl"><span class="snum">2</span>Qaysi kassaga qaytsin?</div>
+        <select class="fselect" id="h-qayt">
+          <option value="rozgor" selected>🏠 Ro'zg'or</option>
+          <option value="xavfsizlik">🛡️ Xavfsizlik</option>
+          <option value="ehson">🤲 Ehson</option>
+          <option value="hordiq">🌴 Hordiq</option>
+          <option value="otaona">👴 Ota-ona</option>
+          <option value="kapital">📈 Kapital</option>
+          <option value="kichik">⭐ Kichik orzu</option>
+          <option value="katta">🌟 Katta orzu</option>
+        </select>
+      </div>
+      <button class="abtn btn-gold" onclick="hamyonQaytarish()">↩️ Qoldiqni qaytarish</button>
     </div>
-    <div class="step-blk">
-      <div class="step-ttl"><span class="snum">2</span>Izoh — nima uchun?</div>
-      <input class="finput" type="text" id="h-izoh" placeholder="Masalan: Bozorga bordim">
+
+    <!-- TAB 2: SARFLASH (xarajat kabi) -->
+    <div id="htab-sarf" style="display:none">
+      <div class="fgrp">
+        <label class="flbl">Qaysi hamyondan</label>
+        <select class="fselect" id="hs-hisob" onchange="showKbal('hs-hisob','hskbal');calcHamyonSarf()">
+          <option value="hamyon-ruslan">👔 Ruslan hamyoni</option>
+          <option value="hamyon-xolida">👜 Xolida hamyoni</option>
+        </select>
+        <div class="kbal-hint" id="hskbal"></div>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Summa</label>
+        <input class="finput big" type="number" id="hs-summa" placeholder="0" inputmode="numeric" oninput="calcHamyonSarf()">
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Izoh — nima uchun sarflandi?</label>
+        <input class="finput" type="text" id="hs-izoh" placeholder="Masalan: Bozorga bordim, kiyim oldim...">
+      </div>
+      <div class="fgrp">
+        <label class="flbl">To'lov turi</label>
+        <div class="pay-row">
+          <button class="pbtn active" onclick="setPay('hs','naqt',this)">💵 Naqt</button>
+          <button class="pbtn" onclick="setPay('hs','plastik',this)">💳 Plastik</button>
+        </div>
+      </div>
+      <div class="res-blk" id="hs-result">
+        <div class="res-row"><span>Hamyondagi pul</span><span class="rv gold" id="hsr-bal">—</span></div>
+        <div class="res-row"><span>Sarflanadi</span><span class="rv neg" id="hsr-sarf">—</span></div>
+        <div style="border-top:1px solid rgba(61,214,140,0.2);padding-top:7px;margin-top:3px" class="res-row">
+          <span style="font-weight:700">Qoldiq</span><span class="rv pos" id="hsr-qoldiq">—</span>
+        </div>
+      </div>
+      <button class="abtn btn-r" onclick="hamyonSarf()">💸 Xarajatni tasdiqlash</button>
     </div>
-    <div class="res-blk" id="h-result">
-      <div class="res-row"><span>Hamyondagi pul</span><span class="rv gold" id="hr-bal">—</span></div>
-      <div class="res-row"><span>Sarflanadi</span><span class="rv neg" id="hr-sarf">—</span></div>
-      <div style="border-top:1px solid rgba(61,214,140,0.2);padding-top:7px;margin-top:3px" class="res-row"><span style="font-weight:700">Qoldiq</span><span class="rv pos" id="hr-qoldiq">—</span></div>
-    </div>
-    <div class="step-blk">
-      <div class="step-ttl"><span class="snum">3</span>Qoldiq qaysi kassaga qaytsin?</div>
-      <select class="fselect" id="h-qayt">
-        <option value="">— Qaytarmaslik —</option>
-        <option value="xavfsizlik">🛡️ Xavfsizlik</option>
-        <option value="ehson">🤲 Ehson</option>
-        <option value="hordiq">🌴 Hordiq</option>
-        <option value="rozgor" selected>🏠 Ro'zg'or</option>
-        <option value="otaona">👴 Ota-ona</option>
-        <option value="kapital">📈 Kapital</option>
-        <option value="kichik">⭐ Kichik orzu</option>
-        <option value="katta">🌟 Katta orzu</option>
-      </select>
-    </div>
-    <button class="abtn btn-r" onclick="hamyonSarf()">💸 Sarflash & Qoldiqni qaytarish</button>
   </div>
 </div>
 
@@ -492,7 +527,7 @@ const db=firebase.database();
 
 let balans={xavfsizlik:0,ehson:0,hordiq:0,rozgor:0,otaona:0,kapital:0,kichik:0,katta:0,'hamyon-ruslan':0,'hamyon-xolida':0};
 let transactions=[],qarzlar=[];
-let payD='naqt',payX='naqt';
+let payD='naqt',payX='naqt',payHS='naqt';
 let curFilter='all',curOwner='ruslan',curQarzType='bizdan',curCurr='uzs';
 let qarzTypeAdd='bizdan';
 
@@ -650,7 +685,7 @@ function switchMode(m,btn){
 }
 
 function setPay(p,t,btn){
-  if(p==='d') payD=t; else payX=t;
+  if(p==='d') payD=t; else if(p==='x') payX=t; else payHS=t;
   btn.closest('.pay-row').querySelectorAll('.pbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
@@ -719,7 +754,43 @@ function addXarajat(){
   toast('✅ Xarajat: '+fmt(s));
 }
 
-function calcHamyon(){
+function switchHamyonTab(tab, btn) {
+  document.querySelectorAll('#s-hamyon .tog-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('htab-ol').style.display = tab === 'ol' ? '' : 'none';
+  document.getElementById('htab-sarf').style.display = tab === 'sarf' ? '' : 'none';
+  if (tab === 'sarf') showKbal('hs-hisob', 'hskbal');
+}
+
+function calcHamyonSarf() {
+  const hisob = document.getElementById('hs-hisob').value;
+  const sarf = parseFloat(document.getElementById('hs-summa').value) || 0;
+  const rc = document.getElementById('hs-result');
+  const hBal = balans[hisob] || 0;
+  if (!sarf) { rc.classList.remove('show'); return; }
+  rc.classList.add('show');
+  document.getElementById('hsr-bal').textContent = fmt(hBal);
+  document.getElementById('hsr-sarf').textContent = fmt(sarf);
+  document.getElementById('hsr-qoldiq').textContent = fmt(Math.max(0, hBal - sarf));
+}
+
+function hamyonQaytarish() {
+  const owner = curOwner;
+  const hKey = 'hamyon-' + owner;
+  const summa = parseFloat(document.getElementById('h-qayt-summa').value) || 0;
+  const kassa = document.getElementById('h-qayt').value;
+  const nm = owner.charAt(0).toUpperCase() + owner.slice(1);
+  if (!summa || summa <= 0) { toast('Summa kiriting!', true); return; }
+  const hBal = balans[hKey] || 0;
+  if (hBal < summa) { toast('Hamyonda yetarli pul yo\'q! Mavjud: ' + fmt(hBal), true); return; }
+  const nb = { ...balans };
+  nb[hKey] = hBal - summa;
+  nb[kassa] = (nb[kassa] || 0) + summa;
+  db.ref('/balans').set(nb);
+  db.ref('/transactions').push({ type: 'hamyon-qayt', hisob: kassa, owner, summa, izoh: nm + ' hamyonidan ' + KASSA[kassa] + ' kassasiga qaytarildi', timestamp: Date.now(), date: new Date().toLocaleDateString('uz-UZ') });
+  document.getElementById('h-qayt-summa').value = '';
+  toast('✅ ' + fmt(summa) + ' ' + KASSA[kassa] + ' kassasiga qaytarildi');
+}
   const sarf=parseFloat(document.getElementById('h-sarf').value)||0;
   const hKey='hamyon-'+curOwner;
   const hBal=balans[hKey]||0;
@@ -750,28 +821,22 @@ function hamyonOl(){
 }
 
 function hamyonSarf(){
-  const sarf=parseFloat(document.getElementById('h-sarf').value)||0;
-  const izoh=document.getElementById('h-izoh').value||'Hamyondan sarflandi';
-  const qaytKassa=document.getElementById('h-qayt').value;
-  const hKey='hamyon-'+curOwner;
-  const hBal=balans[hKey]||0;
-  const nm=curOwner.charAt(0).toUpperCase()+curOwner.slice(1);
-  if(!sarf||sarf<=0){toast('Sarflangan summani kiriting!',true);return;}
-  if(hBal<sarf){toast('Hamyonda yetarli pul yo\'q! Mavjud: '+fmt(hBal),true);return;}
-  const qoldiq=hBal-sarf;
-  const nb={...balans};
-  nb[hKey]=hBal-sarf;
-  db.ref('/transactions').push({type:'xarajat',hisob:hKey,owner:curOwner,summa:sarf,izoh:izoh+' ('+nm+' hamyonidan)',payType:'naqt',timestamp:Date.now()-1,date:new Date().toLocaleDateString('uz-UZ')});
-  if(qaytKassa&&qoldiq>0){
-    nb[hKey]=0;nb[qaytKassa]=(nb[qaytKassa]||0)+qoldiq;
-    db.ref('/transactions').push({type:'hamyon-qayt',hisob:qaytKassa,owner:curOwner,summa:qoldiq,izoh:'Qoldiq '+KASSA[qaytKassa]+' kassasiga qaytarildi',timestamp:Date.now(),date:new Date().toLocaleDateString('uz-UZ')});
-  }
+  const hisob = document.getElementById('hs-hisob').value;
+  const sarf = parseFloat(document.getElementById('hs-summa').value) || 0;
+  const izoh = document.getElementById('hs-izoh').value || 'Hamyondan sarflandi';
+  const owner = hisob.split('-')[1];
+  const nm = owner.charAt(0).toUpperCase() + owner.slice(1);
+  const hBal = balans[hisob] || 0;
+  if (!sarf || sarf <= 0) { toast('Summa kiriting!', true); return; }
+  if (hBal < sarf) { toast('Hamyonda yetarli pul yo\'q! Mavjud: ' + fmt(hBal), true); return; }
+  const nb = { ...balans };
+  nb[hisob] = hBal - sarf;
   db.ref('/balans').set(nb);
-  document.getElementById('h-sarf').value='';document.getElementById('h-izoh').value='';
-  document.getElementById('h-result').classList.remove('show');
-  let msg='✅ Sarflandi: '+fmt(sarf);
-  if(qaytKassa&&qoldiq>0) msg+=' | Qaytdi: '+fmt(qoldiq);
-  toast(msg);
+  db.ref('/transactions').push({ type: 'xarajat', hisob, owner, summa: sarf, izoh: izoh + ' (' + nm + ' hamyonidan)', payType: payHS || 'naqt', timestamp: Date.now(), date: new Date().toLocaleDateString('uz-UZ') });
+  document.getElementById('hs-summa').value = '';
+  document.getElementById('hs-izoh').value = '';
+  document.getElementById('hs-result').classList.remove('show');
+  toast('✅ Sarflandi: ' + fmt(sarf));
 }
 
 // ===== QARZ =====
