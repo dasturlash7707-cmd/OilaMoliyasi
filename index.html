@@ -537,16 +537,29 @@ const KASSA={xavfsizlik:"Xavfsizlik",ehson:"Ehson",hordiq:"Hordiq",rozgor:"Ro'zg
 let pinInput='',pinSetup='',pinMode='check';
 
 function initPin(){
-  db.ref('/pin').once('value',snap=>{
-    if(!snap.val()){
+  // Avval localStorage dan tekshir (tez ishlaydi)
+  const localPin = localStorage.getItem('oila_pin');
+  if(!localPin){
+    // Firebase dan ham tekshir
+    try {
+      db.ref('/pin').once('value',snap=>{
+        if(!snap.val()){
+          pinMode='setup';
+          document.getElementById('pin-sub').textContent='Yangi PIN kod o\'rnatish';
+          document.getElementById('pin-hint').textContent='4 ta raqam kiriting';
+        } else {
+          // Firebase da bor, localStorage ga ham saqlash
+          localStorage.setItem('oila_pin', snap.val());
+          pinMode='check';
+        }
+      });
+    } catch(e) {
       pinMode='setup';
       document.getElementById('pin-sub').textContent='Yangi PIN kod o\'rnatish';
-      document.getElementById('pin-hint').textContent='4 ta raqam kiriting — bu sizning shaxsiy kodingiz';
-    } else {
-      pinMode='check';
-      document.getElementById('pin-sub').textContent='PIN kodingizni kiriting';
     }
-  });
+  } else {
+    pinMode='check';
+  }
 }
 
 function pinPress(d){
@@ -572,7 +585,9 @@ function checkPin(){
       updateDots(); return;
     }
     if(pinSetup===pinInput){
-      db.ref('/pin').set(btoa(pinInput));
+      const encoded = btoa(pinInput);
+      localStorage.setItem('oila_pin', encoded);
+      try { db.ref('/pin').set(encoded); } catch(e) {}
       openApp();
     } else {
       pinError('PIN mos kelmadi, qaytadan');
@@ -580,10 +595,22 @@ function checkPin(){
     }
     return;
   }
-  db.ref('/pin').once('value',snap=>{
-    if(snap.val()===btoa(pinInput)) openApp();
+  // Tekshirish: localStorage dan
+  const localPin = localStorage.getItem('oila_pin');
+  if(localPin){
+    if(localPin === btoa(pinInput)) openApp();
     else pinError('PIN kod noto\'g\'ri!');
-  });
+  } else {
+    // Firebase dan tekshir
+    try {
+      db.ref('/pin').once('value',snap=>{
+        if(snap.val()===btoa(pinInput)){
+          localStorage.setItem('oila_pin', snap.val());
+          openApp();
+        } else pinError('PIN kod noto\'g\'ri!');
+      });
+    } catch(e) { pinError('Xatolik yuz berdi'); }
+  }
 }
 function pinError(msg){
   for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.add('error');
